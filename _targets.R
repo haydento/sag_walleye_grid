@@ -5,7 +5,7 @@ source("src/glider_funcs.R")
 source("src/util_funcs.R")
 options(tidyverse.quiet = TRUE)
 
-tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere"))
+tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet"))
 
 list(
   # load path to LWF receivers
@@ -34,7 +34,7 @@ list(
 
   # Convert LWF grid to sf object
   tar_target(
-    all_grid,
+    grid,
     {grd <- fread(raw_grid);
       st_as_sf(grd, coords = c("longitude", "latitude"), remove = FALSE, crs = 4326, agr = "constant")
     },
@@ -48,10 +48,16 @@ list(
   ),
   
   tar_target(
-    bathy_SB,
-    prep_bathy(raw_bathy, xmin_out = -83.61763, xmax_out = -83.45284, ymin_out = 44.04096, ymax_out = 44.18836, out_pth = "~/Documents/WA_sources_of_reproduction_2021/grid_planing/output/bathy_SB.tif"),
+    bathy,
+    prep_bathy(raw_bathy, xmin_out = -83.96, xmax_out = -82.535, ymin_out = 43.6, ymax_out = 44.44, out_pth = "~/Documents/WA_sources_of_reproduction_2021/grid_planing/output/bathy_SB.tif"),
     format = "file"
-  )
+  ),
+
+tar_target(
+  map,
+  grid_map(bathy, grid, sbay, pth = "docs/index.html"),
+  format = "file"
+)
 
 
   ## tar_target(
