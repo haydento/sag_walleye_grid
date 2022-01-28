@@ -49,21 +49,28 @@ list(
   
   tar_target(
     bathy,
-    prep_bathy(raw_bathy, xmin_out = -83.96, xmax_out = -82.535, ymin_out = 43.6, ymax_out = 44.44, out_pth = "~/Documents/WA_sources_of_reproduction_2021/grid_planing/output/bathy_SB.tif"),
+    prep_bathy(raw_bathy, xmin_out = -83.96, xmax_out = -82.535, ymin_out = 43.5, ymax_out = 44.44, out_pth = "~/Documents/WA_sources_of_reproduction_2021/grid_planing/output/bathy_SB.tif"),
     format = "file"
   ),
 
 tar_target(
+  grid_depth,
+  depth_extract(raw_recs = grid, bathy = bathy, lidar = NULL),
+  format = "rds"
+  ),
+
+tar_target(
   map,
-  grid_map(bathy, grid, sbay, pth = "docs/index.html"),
+  grid_map(bathy, grid = grid_depth, sbay, pth = "docs/index.html"),
   format = "file"
-)
+),
 
+tar_target(
+  rec_grid,
+  .grid(poly = sbay, cellsize = c(10000, 10000), in_crs = 3175, out_crs = 4326),
+  format = "rds"
+ )
+) 
 
-  ## tar_target(
-  ##   clean_grid,
-  ##   .clean_grid(),
-  ##   format = "rds"
-)
 
 

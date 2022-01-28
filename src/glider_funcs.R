@@ -53,6 +53,16 @@ prep_bathy <- function(bathy1, xmin_out, xmax_out,  ymin_out, ymax_out, out_pth 
 #' depth_extract(all_mob, bathy, lidar)
 #' depth_extract(parallel_lines, bathy)
 
+#' tar_load(grid)
+#' raw_recs = grid
+#' tar_load(bathy)
+#' lidar = NULL
+#' 
+#'  depth_extract(raw_recs = grid, bathy = bathy, lidar = NULL),
+
+
+
+
 depth_extract <- function(raw_recs, bathy, lidar= NULL){
   
   if(is.character(raw_recs)){
@@ -62,8 +72,8 @@ depth_extract <- function(raw_recs, bathy, lidar= NULL){
   }
 
   if(!is.character(raw_recs)){
-    recs <- sf::st_as_sf(x = raw_recs, crs = 4326, coords = c("lon", "lat"), remove = FALSE )
-    recs <- terra::vect(recs)
+    #recs <- sf::st_as_sf(x = raw_recs, crs = 4326, coords = c("lon", "lat"), remove = FALSE )
+    recs <- terra::vect(raw_\recs)
   }
   
   bath <- terra::rast(bathy)
@@ -91,8 +101,8 @@ depth_extract <- function(raw_recs, bathy, lidar= NULL){
   }
 
   if(!is.character(raw_recs) & is.null(lidar)){
-    out <- out[, c("geom", "x", "y", "array", "station", "depth_ft_bathy")]
-    setnames(out, c("geom", "x", "y", "array", "station", "depth_ft_bathy"), c("id", "lon", "lat", "glatos_array", "site", "depth_ft"))
+    out <- out[, c("geom", "x", "y", "station", "depth_ft_bathy")]
+    setnames(out, c("geom", "x", "y", "station", "depth_ft_bathy"), c("id", "lon", "lat", "site", "depth_ft"))
 
     substrRight <- function(x, n){
       substr(x, nchar(x)-n+1, nchar(x))

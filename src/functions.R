@@ -29,7 +29,7 @@ grid_map <- function(bathy, grid, sbay, pth){
   m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")
  # m <- addPolylines(map = m, data = glider_pth, lng = ~lon, lat = ~lat, color = "green")
 #  m <- addMarkers(m, lng = -83.58845, lat = 44.08570, label = "release")
-  m <- addCircleMarkers(m, data = grid, label = ~station, color = c("red"), radius = c(4), group = "recs", stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = grid, label = ~site_label, color = c("red"), radius = c(4), group = "recs", stroke = FALSE, fillOpacity = 1)
                     
   
 #  m <- addCircleMarkers(m, data = sync_100, label = ~label, fillColor = "yellow", radius = 8, group = "sentinel tag", stroke = FALSE, fillOpacity = 1)
@@ -45,5 +45,40 @@ grid_map <- function(bathy, grid, sbay, pth){
   htmlwidgets::saveWidget(m, pth)
 
   return(pth)
-  }
+}
+
+
+
+#################
+#' @title find grid in polygon
+#' @description calculates equally spaced grid within polygon
+#' @param sag_poly polygon in which grid is desired
+#' @param cellsize distance between receivers in grid (in meters)
+#' @param in_crs temporary crs used to calculate grid
+#' @param out_crs output crs of grid
+#' @value sf point object
+
+#' @examples
+#' tar_load(sbay)
+#' cellsize = c(10000,10000)
+#' in_crs = 3175
+#' out_crs = 4326
+#' tst <- grid(poly = sbay, cellsize = c(10000,10000), in_crs = 3175, out_crs = 4326)
+#' plot(st_geometry(sbay))
+#' plot(st_geometry(tst), add = TRUE)
+
+.grid <- function(poly, cellsize, in_crs = 3175, out_crs = 4326){
+
+  y <- st_transform(poly, crs = in_crs)
+  x <- st_make_grid(y, what = "centers", cellsize = cellsize)
+  x <- st_as_sf(x)
+  x <- st_join(x = x, y = y, left = FALSE)
+  x <- st_transform(x, crs = out_crs)
+
+  return(x)
+}
+
+
+
+
 
