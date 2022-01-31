@@ -73,7 +73,7 @@ depth_extract <- function(raw_recs, bathy, lidar= NULL){
 
   if(!is.character(raw_recs)){
     #recs <- sf::st_as_sf(x = raw_recs, crs = 4326, coords = c("lon", "lat"), remove = FALSE )
-    recs <- terra::vect(raw_\recs)
+    recs <- terra::vect(raw_recs)
   }
   
   bath <- terra::rast(bathy)

@@ -1,3 +1,21 @@
+#' @title simple clean up reef information, prepare for plotting
+#' @description remove degrees symbol in lat/long, simplify column names, convert to sf object
+#' @param x table of reefs information
+#'
+#' @examples
+#' tar_load(dirty_reefs)
+#' x <- dirty_reefs
+#' clean_reefs(dirty_reefs)
+
+clean_reefs <- function(x = dirty_reefs){
+  x[, c("Long", "Lat") := list(as.numeric(sub("\\p{So}", "", x$Long, perl = TRUE)), as.numeric(sub("\\p{So}", "", x$Lat, perl = TRUE)))]
+  x <- x[, c("Reef", "Lat", "Long")]
+  setnames(x, names(x), tolower(names(x)))
+  x <- st_as_sf(x, coords = c("long", "lat"), remove = FALSE, crs = 4326, agr = "constant")
+  return(x)
+}  
+
+
 #' @title create custom leaflet interactive map of planning data used for study design
 #' @description Creates map that overlays two sources of bathymetry (lidar and GL bathymetry), receiver locations, sentinal tag locations, area of proposed glider patrols, mobile tracking listening stations
 #' @param bathy file path to bathymetry layer (tif)
@@ -7,10 +25,12 @@
 #' tar_load(bathy)
 #' tar_load(grid)
 #' tar_load(sbay)
+#' tar_load(reefs)
+#' tar_load(rec_grid)
 #' grid_map(bathy, lidar, sentinal, rec_depth, glid_area = glider, mobile = mobile_listen)
 
 # create leaflet map
-grid_map <- function(bathy, grid, sbay, pth){
+grid_map <- function(bathy, grid, sbay, reefs, rec_grid, spawn_rivers,  pth){
 
   bath <- terra::rast(bathy)
 #  bath <- terra::aggregate(bath, fact = 4)
@@ -29,9 +49,12 @@ grid_map <- function(bathy, grid, sbay, pth){
   m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")
  # m <- addPolylines(map = m, data = glider_pth, lng = ~lon, lat = ~lat, color = "green")
 #  m <- addMarkers(m, lng = -83.58845, lat = 44.08570, label = "release")
-  m <- addCircleMarkers(m, data = grid, label = ~site_label, color = c("red"), radius = c(4), group = "recs", stroke = FALSE, fillOpacity = 1)
-                    
-  
+
+  m <- addCircleMarkers(m, data = grid, label = grid$station, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = reefs, label = ~reef, color = c("blue"),   radius = c(6),  group = "bay reefs",     stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = rec_grid, label = ~STATE, color = c("yellow"), radius = c(10), group = "proposed recs", stroke = FALSE, fillOpacity = 1)
+  m <- addMarkers(m, data = spawn_rivers, label = ~river, group = "spawn rivers")
+                      
 #  m <- addCircleMarkers(m, data = sync_100, label = ~label, fillColor = "yellow", radius = 8, group = "sentinel tag", stroke = FALSE, fillOpacity = 1)
 #  m <- addCircleMarkers(m, data = all_mob, label = ~label_short, fillColor = "orange", radius = 8, group = "mobile", stroke = FALSE, fillOpacity = 1)
   m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "sag bay")
@@ -40,7 +63,7 @@ grid_map <- function(bathy, grid, sbay, pth){
 #  m <- addLegend(m, pal = pal_lidar, values = lid[[1]], title = "depth (lidar, ft)", opacity = 1, group = "lidar_depth")
 #  m <- addLayersControl(m, overlayGroups = c("LH_depth", "lidar_depth", "receivers", "sentinel tag", "mobile", "glider patrol"), options = layersControlOptions(collapsed = FALSE))
     m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
-  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt", "bathy (ft)"), overlayGroups = c("recs", "sag bay"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt", "bathy (ft)"), overlayGroups = c("LWF recs", "sag bay", "bay reefs", "proposed recs", "spawn rivers"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
   
   htmlwidgets::saveWidget(m, pth)
 

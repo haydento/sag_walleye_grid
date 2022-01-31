@@ -5,9 +5,16 @@ source("src/glider_funcs.R")
 source("src/util_funcs.R")
 options(tidyverse.quiet = TRUE)
 
-tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet"))
+tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl"))
 
-list(
+list(  
+  # load path to Saginaw Bay Reef locations
+  tar_target(
+    raw_SB_reefs,
+    "data/Saginaw Bay Reef Locations.xlsx",
+    format = "file"
+    ),
+  
   # load path to LWF receivers
   tar_target(
     raw_grid,
@@ -61,7 +68,7 @@ tar_target(
 
 tar_target(
   map,
-  grid_map(bathy, grid = grid_depth, sbay, pth = "docs/index.html"),
+  grid_map(bathy, grid = grid_depth, sbay, reefs = reefs, rec_grid, spawn_rivers = spawn_rivs, pth = "docs/index.html"),
   format = "file"
 ),
 
@@ -69,7 +76,62 @@ tar_target(
   rec_grid,
   .grid(poly = sbay, cellsize = c(10000, 10000), in_crs = 3175, out_crs = 4326),
   format = "rds"
- )
+),
+
+# read in Sag Bay reefs, write out an object for future debugging
+tar_target(
+  dirty_reefs,
+  {out <- as.data.table(read_xlsx(path = raw_SB_reefs, range = "Reefs!D6:I15"));
+   #fwrite(out, "data/SB_reefs.csv")
+  },
+  format = "fst_dt"
+),
+
+tar_target(
+  reefs,
+  clean_reefs(x = dirty_reefs),
+  format = "rds"
+),
+
+tar_target(
+  raw_spawn_riv,
+  "data/spawning_rivers.csv",
+  format = "file"
+),
+
+tar_target(
+  spawn_rivs,
+  {out <- fread(raw_spawn_riv);
+    st_as_sf(out, agr = "constant", remove = FALSE, coords = c("long", "lat"), crs = 4326)
+  },
+  format = "rds"
+),
+
+tar_target(
+  sag_river_mth_raw,
+  "data/SB_mouth.gpkg",
+  format = "file"
+),
+
+tar_target(
+  r_mth,
+  mth <- st_read(sag_river_mth_raw, quiet = TRUE),
+  format = "rds"
+),
+
+tar_target(
+  mth_only,
+  st_intersection(r_mth, sbay),
+  format = "rds"
+),
+
+tar_target(
+  test,
+  .grid(poly = mth_only, cellsize = c(6000, 6000), in_crs = 3175, out_crs = 4326),
+  format = "rds"
+)
+
+  
 ) 
 
 
