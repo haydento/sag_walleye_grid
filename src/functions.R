@@ -513,6 +513,13 @@ sim_fish_rec_dist <- function(fsh_trks, rec_grid){
 #' show_progress = FALSE
 #' rc_intercept = 0.5
 #' rc_slope = -1/120
+#' 
+#' tar_load(raw_log_reg_H_GBE)
+#' rng_curve <- raw_log_reg_H_GBE
+#' rng_crv <- fread(rng_curve)
+#'
+#' # rename range curve columns
+#' setnames(rng_crv, names(rng_crv), paste0("rc_", names(rng_crv)))
 #'
 #' ba = c(1.4, -0.00433)
 #' .sim_dtc(dtc_trans = sim_tag_trans, recLoc = bay_mth_grd, EPSG = 3175, sp_out = FALSE, show_progress = FALSE, min_dist, ba = c(1.493, -0.0043379))
@@ -523,32 +530,135 @@ sim_fish_rec_dist <- function(fsh_trks, rec_grid){
   recLoc <- data.table(x = recLoc[,1], y = recLoc[,2])
   min_dist <- data.table(min_dist, rc_intercept = b[1], rc_slope = b[2]) 
 
-  pdrf <- function(dm, b=ba){
-    p <- 1/(1+exp(-(b[1] + b[2]*dm)))
+####dev tst
+  dtc_trans_tst <- dtc_trans[fish %in% c(1,2),]
+  rng_crv_tst <- rng_crv[Interval %in% c(72, 73),]
+
+  
+fsh <- unique(dtc_trans_tst$fish)
+interval <- unique(rng_crv_tst$DateTime)
+
+  out <- CJ(fish = dtc_trans_tst$fish, DateTime = rng_crv_tst$DateTime, unique = TRUE)
+  out <-   out[rng_crv_tst, on = "DateTime"]
+  out <- out[dtc_trans_tst, on = "fish", allow.cartesian = TRUE]
+
+  dtc_trans <- out[fish == 1 & Interval == 72,]
+
+
+  dtc_trans[, detRngFun := deparse1(pdrf)]
+
+tst <- eval(parse(text = dtc_trans$detRngFun[1]))
+
+
+
+
+
+
+  
+
+
+  
+  out <- dtc_trans[, {pdrf = function(dm){
+    p <- 1/(1+exp(-(.SD[, "Intercept"], + .SD[, "Slope"]*dm)))
     return(p)
+  };
+    detect_transmissions_updated(trnsLoc = .SD[, c("x", "y", "et")],
+                                 recLoc = recLoc,
+                                 detRngFun = pdrf,
+                                 EPSG = 3175,
+                                 sp_out = FALSE,
+                                 show_progress = FALSE)},
+    by = .(fish, Interval)]
+
+
+  myfunc <- function(w){
+    myfunc2=function(x){
+      y = w%*%x
+      return(y)
+    }
+    return(myfunc2)
   }
   
-  out <- dtc_trans[, detect_transmissions_updated(trnsLoc = .SD,
-                                                  recLoc = recLoc,
-                                                  detRngFun = pdrf,
-                                                  EPSG = EPSG,
-                                                  sp_out = sp_out,
-                                                  show_progress = show_progress),
-                   by = .(fish), .SDcols = c("x", "y", "et")]
 
-  out <- merge(out, min_dist, all.y = TRUE)
 
-  # total number of virtual fish
-  out[, num_sim_fish := max(fish)]
+  myFunc <- function(x) {print(x)}
+  funcAsText <- deparse(myFunc)
 
-  # total number of times each fish was detected.  fish not detected = NA 
-  out[!is.na(recv_id), times_dtc := nrow(.SD), by = "fish"]
+  newMyFunc <- eval(parse(text=funcAsText))
 
-  # total number of fish detected at least once
-  out[!is.na(recv_id), num_dtc := uniqueN(fish)]
 
-  # overall detection probabiliity
-  out[!is.na(recv_id), array_dtc_prob := num_dtc/num_sim_fish]
+  pdrf <-  function(dm, intercept, slope){
+      p <- 1/(1+exp(-(intercept + slope*dm)))
+      return(p)
+    }
+
+
+  
+  pdrf_txt <- deparse(pdrf)
+  eval(parse(text = pdrf_txt))
+
+  
+
+  tes
+  
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+  tst <- function(slope, intercept, dm){
+    pdrf <- function(dm, intercept, slope){
+      p <- 1/(1+exp(-(intercept + slope*dm)))
+      return(p)
+    }
+    return(pdrf)
+  }
+
+  tst(slope = 0.5, intercept = -1/120, dm = c(100,200))
+      
+w
+  
+
+
+
+
+
+
+  
+  ## pdrf <- function(dm, b=ba){
+  ##   p <- 1/(1+exp(-(b[1] + b[2]*dm)))
+  ##   return(p)
+  ## }
+  
+  ## out <- dtc_trans[, detect_transmissions_updated(trnsLoc = .SD,
+  ##                                                 recLoc = recLoc,
+  ##                                                 detRngFun = pdrf,
+  ##                                                 EPSG = EPSG,
+  ##                                                 sp_out = sp_out,
+  ##                                                 show_progress = show_progress),
+  ##                  by = .(fish), .SDcols = c("x", "y", "et")]
+
+  ## out <- merge(out, min_dist, all.y = TRUE)
+
+  ## # total number of virtual fish
+  ## out[, num_sim_fish := max(fish)]
+
+  ## # total number of times each fish was detected.  fish not detected = NA 
+  ## out[!is.na(recv_id), times_dtc := nrow(.SD), by = "fish"]
+
+  ## # total number of fish detected at least once
+  ## out[!is.na(recv_id), num_dtc := uniqueN(fish)]
+
+  ## # overall detection probabiliity
+  ## out[!is.na(recv_id), array_dtc_prob := num_dtc/num_sim_fish]
 
   return(out[])
 }
