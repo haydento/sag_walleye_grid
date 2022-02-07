@@ -511,12 +511,23 @@ sim_fish_rec_dist <- function(fsh_trks, rec_grid){
 #' EPSG = 3175
 #' sp_out = FALSE
 #' show_progress = FALSE
-#' .sim_dtc(dtc_trans = sim_tag_trans, recLoc = bay_mth_grd, detRngFun = pdrf, EPSG = 3175, sp_out = FALSE, show_progress = FALSE, min_dist)
+#' rc_intercept = 0.5
+#' rc_slope = -1/120
+#'
+#' ba = c(1.4, -0.00433)
+#' .sim_dtc(dtc_trans = sim_tag_trans, recLoc = bay_mth_grd, EPSG = 3175, sp_out = FALSE, show_progress = FALSE, min_dist, ba = c(1.493, -0.0043379))
 
 
-.sim_dtc <- function(dtc_trans, recLoc, detRngFun, EPSG, sp_out, show_progress, min_dist){
+.sim_dtc <- function(dtc_trans, recLoc, EPSG, sp_out, show_progress, min_dist, ba){
   recLoc <- st_coordinates(recLoc)
   recLoc <- data.table(x = recLoc[,1], y = recLoc[,2])
+  min_dist <- data.table(min_dist, rc_intercept = b[1], rc_slope = b[2]) 
+
+  pdrf <- function(dm, b=ba){
+    p <- 1/(1+exp(-(b[1] + b[2]*dm)))
+    return(p)
+  }
+  
   out <- dtc_trans[, detect_transmissions_updated(trnsLoc = .SD,
                                                   recLoc = recLoc,
                                                   detRngFun = pdrf,
@@ -541,6 +552,98 @@ sim_fish_rec_dist <- function(fsh_trks, rec_grid){
 
   return(out[])
 }
+
+###################
+
+#' tar_load(raw_log_reg_H_GBE)
+#' rng_curve <- raw_log_reg_H_GBE
+#' tar_load(sim_tag_trans)
+#' dtc_trans = sim_tag_trans
+#' tar_load(bay_mth_grd)
+#' recLoc <- bay_mth_grd
+#' tar_load(min_dist)
+#'
+#' array_dtc_prob(rng_curve = rng_curve, dtc_trans = sim_tag_trans, recLoc = bay_mth_grd, detRngFun = pdrf,  min_dist = min_dist)
+
+
+array_dtc_prob <- function(rng_curve, dtc_trans, recLoc, detRngFun,  min_dist){
+  # load up GB logistic regression params
+  rng_crv <- fread(rng_curve)
+
+  # rename range curve columns
+  setnames(rng_crv, names(rng_crv), paste0("rc_", names(rng_crv)))
+
+  # do simulation for each slope intercept in "rng_crv"
+  ## rows <- nrow(rng_crv)
+  ## out <- vector(mode = "list", length = rows)
+
+  ## for( i in 1:rows){
+  ##   sim <- .sim_dtc(dtc_trans = dtc_trans, recLoc = recLoc, detRngFun = pdrf(b = c(rng_crv$rc_Intercept[i],  rng_crv$rc_Slope[i])), EPSG = 3175, sp_out = FALSE, show_progress = FALSE, min_dist = min_dist)
+
+  ##   out[[i]] <-  cbind(sim, rng_crv[i])
+  ## }
+
+  rng_crv[rc_Interval == 1, {
+    tst <- .SD[1, c("rc_Intercept", "rc_Slope")]
+    tst1 <- c(tst$rc_Intercept, tst$rc_Slope)
+    tst1}
+    #    .sim_dtc(dtc_trans = dtc_trans, recLoc = recLoc, EPSG = 3175, sp_out = FALSE, show_progress = FALSE, ba = tst1, min_dist = min_dist)}
+, by = .(rc_Interval)]
+
+
+
+  tst_fun <- function(ba) {
+    return(ba)
+
+tst <- rng_crv[, tst_fun(ba = .SD[1, c("rc_Intercept", "rc_Slope")]), by = .(rc_Interval)]
+
+    
+  
+rng_crv[rc_Interval == 1, .
+
+  
+
+## apply(rng_crv, 1, FUN = function(x) {.sim_dtc(dtc_trans = dtc_trans, recLoc = recLoc, EPSG = 3175, sp_out = FALSE, show_progress = FALSE, b = x, min_dist = min_dist)}, simplify = FALSE)
+
+
+  
+
+  
+  return(out)
+}
+
+## ptm <- proc.time()
+## ptoc.time() - ptm
+
+## tst <- rbindlist(
+
+
+  ####################3
+
+
+
+  
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###############
 #' tar_load(sim_tracks)
@@ -568,50 +671,6 @@ sim_fish_rec_dist <- function(fsh_trks, rec_grid){
   return(out)
 }
 
-                   
-
-
-
-
-
-
-
-
-
-## # calculate all transmissions for all fish separately, then combine with data.table
-##  trans <- trks[, transmit_along_path_updated(path = .SD, vel = 0.5, delayRng = c(60,180), burstDur = 5, EPSG = 3175, sp_out = FALSE), by = .(fish), .SDcols = c("x", "y")]
-
-## #  determine all detection transmissions
-## out <- trans[, detect_transmissions_updated(trnsLoc = .SD, recLoc = recLoc, detRngFun = pdrf, EPSG = 3175, sp_out = FALSE, show_progress = FALSE), by = .(fish), .SDcols = c("x", "y", "et")]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# detect transmissions for all tracks
-## fsh <- unique(trans$fish)
-## out <- vector(mode = "list", length = length(fsh))
-
-## for(i in 1:length(fsh)){
-##   trans.i <- trans[fish == fsh[i],]
-
-##   foo <- detect_transmissions_updated(trnsLoc = trans.i, recLoc = recLoc, detRngFun = pdrf, EPSG = 3175, sp_out = FALSE, show_progress = FALSE)
-
-## out[[i]] <- foo
-## }
-
-## dtc_pts <- rbindlist(out)
-
-
 ## #########################
 ## library(viridis)
 
@@ -636,7 +695,17 @@ sim_fish_rec_dist <- function(fsh_trks, rec_grid){
 ## }
 
 
+dist <- seq(0,2000,25)
+# b = c(intercept, slope)
+b = c(114.590585954034,-0.189486287548403)
+prob <- pdrf(dm = dist, b = b)
 
+pdrf <- function(dm, b=c(0.5, -1/120)){
+       p <- 1/(1+exp(-(b[1]+b[2]*dm)))
+       return(p)
+     }
+
+plot(x = dist, y = prob, type = "o")
 
 
 

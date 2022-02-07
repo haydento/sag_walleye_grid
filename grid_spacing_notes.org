@@ -1,0 +1,13 @@
+* Receiver spacing- Green Bay simulations, static range testing- Sept 2016 - April 2017 
+- 3 locations in Green Bay
+- V13-H, V13-L, several different delays
+- Depth?
+- Range testing was to support Lake White Fish study
+** Detection range curves
+- V13-H- 50% probability of detecting transmission ranged from 100-2000 meters
+- Variable over time and location
+** Line detection range
+- Determine the probability of detecting a fish moving through a line of receivers.  
+- inputs- fish movement rate, detection range curve, delay
+- For V13-H, nominal delay = 300 S, 6000 m receiver spacing, mean detection prob = 0.6
+- For V13-H, nominal delay = 300 S, 4000 m receiver spacing, mean detection prob = 0.7

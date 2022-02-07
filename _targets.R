@@ -7,7 +7,14 @@ options(tidyverse.quiet = TRUE)
 
 tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl"))
 
-list(  
+list(
+  # load path to range curve data collected by Binder in 2016 in GB with V13 tags
+  tar_target(
+    raw_log_reg_H_GBE,
+    "data/Results/Results/GBE/LogisticRegressions/HighPower/logisticResultsH.csv",
+    format = "file"
+  ),
+  
   # load path to Saginaw Bay Reef locations
   tar_target(
     raw_SB_reefs,
@@ -186,8 +193,8 @@ tar_target(
   format = "fst_dt"
 )
 
-# bring in LWF static detection range info...
-# adjust modeling to match actual tag specs and them game away!
+
+
 
 ) 
 
