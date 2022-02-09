@@ -5,7 +5,7 @@ source("src/glider_funcs.R")
 source("src/util_funcs.R")
 options(tidyverse.quiet = TRUE)
 
-tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl"))
+tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl", "leafgl"))
 
 list(
   # load path to range curve data collected by Binder in 2016 in GB with V13 tags
@@ -75,7 +75,7 @@ tar_target(
 
 tar_target(
   map,
-  grid_map(bathy, grid = grid_depth, sbay, reefs = reefs, rec_grid, spawn_rivers = spawn_rivs, bay_mth = bay_mth_grd, pth = "docs/index.html"),
+  grid_map(bathy, grid = grid_depth, sbay, reefs = reefs, rec_grid = in_bay_grd, spawn_rivers = spawn_rivs, bay_mth = bay_mth_grd, sim_fish = sim_tracks, pth = "docs/index.html"),
   format = "file"
 ),
 
@@ -121,11 +121,19 @@ tar_target(
 ),
 
 tar_target(
-  bay_mth,
-  .intersect(sag_bay_mth_raw, sbay),
+  sag_bay_mth,
+  sf::st_read(sag_bay_mth_raw, quiet = TRUE, agr = "constant"),
   format = "rds"
 ),
 
+tar_target(
+  bay_mth,
+  sf::st_intersection(sag_bay_mth, sbay),
+  format = "rds"
+),
+
+
+# create bay mouth array
 tar_target(
   bay_mth_grd,
   .grid(poly = bay_mth, cellsize = c(6000, 6000), in_crs = 3175, out_crs = 4326),
@@ -148,32 +156,33 @@ tar_target(
 tar_target(
   sim_tracks,
   .sim_tracks(
-    n_trks = 50,
+    n_trks = 10,
     poly = LH,
     theta = c(0,25),
-    stepLen = 10000,
-    initHeading = 0,
-    nsteps = 100,
+    stepLen = 1000,
+    initHeading = 40,
+    nsteps = 150,
     initPos = c(-83.6248, 43.8824),
     sp_out = FALSE,
-    show_progress = FALSE),
+    show_progress = FALSE,
+    recs = bay_mth_grd),
   format = "fst_dt"
   ),
 
 # calculate min distance between fish and all receivers in grid
-tar_target(
-  min_dist,
-  sim_fish_rec_dist(fsh_trks = sim_tracks, rec_grid = bay_mth_grd),
-  format = "fst_dt"
-),
+## tar_target(
+##   min_dist,
+##   sim_fish_rec_dist(fsh_trks = sim_tracks, rec_grid = bay_mth_grd),
+##   format = "fst_dt"
+## ),
 
-# calculate transmissions for all simulated fish tracks and simulated tags
+#transmissions for all simulated fish tracks and simulated tags
 tar_target(
   sim_tag_trans,
   .sim_tag_trans(
     path = sim_tracks,
     vel = 0.5,
-    delayRng = c(60,180),
+    delayRng = c(280,400),
     burstDur = 5,
     EPSG = 3175,
     sp_out = FALSE),
@@ -182,21 +191,45 @@ tar_target(
 
 # determine which transmission were detected or not.
 tar_target(
-  sim_dtc,
+  sim_dtc_low_perf,
   .sim_dtc(dtc_trans = sim_tag_trans,
            recLoc = bay_mth_grd,
-           detRngFun = pdrf,
            EPSG = 3175,
            sp_out = FALSE,
            show_progress = FALSE,
-           min_dist = min_dist),
+           min_dist = sim_tracks,
+           ba = c(2.913904, -0.0051440101)),
   format = "fst_dt"
+),
+
+# determine which transmissions were detected or not...
+tar_target(
+  sim_dtc_high_perf,
+  .sim_dtc(dtc_trans = sim_tag_trans,
+           recLoc = bay_mth_grd,
+           EPSG = 3175,
+           sp_out = FALSE,
+           show_progress = FALSE,
+           min_dist = sim_tracks,
+           ba = c(3.104209, -0.0021253279)),
+  format = "fst_dt"
+),
+
+# create "inner bay" area by removing bay mouth region from sag bay polygon
+tar_target(
+  in_bay,
+  .difference(x = sbay, y = sag_bay_mth),
+  format = "rds"
+),
+
+tar_target(
+  in_bay_grd,
+  .grid(poly = in_bay, cellsize = c(15000, 15000), in_crs = 3175, out_crs = 4326),
+  format = "rds"
 )
-
-
-
-
-) 
+    
+ 
+)
 
 
 
