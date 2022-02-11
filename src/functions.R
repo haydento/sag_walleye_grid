@@ -1100,6 +1100,94 @@ check_in_polygon <- function(points, polygon, EPSG){
 
 
 
+######################
+#' tar_load(reefs)
+#' tar_load(in_bay_grd)
+#' tar_load(sbay)
+## nearest <- st_nearest_feature(reefs, in_bay_grd)
+## ls <- st_nearest_points(reefs, in_bay_grd[nearest,], pairwise = TRUE)
+
+## plot(st_geometry(sbay))
+## plot(st_geometry(reefs), add = TRUE, col = "red", pch = 16)
+## plot(st_geometry(in_bay_grd), add = TRUE, col = "blue", pch = 16)
+## plot(ls, add = TRUE, col = "green")
+
+
+## dist <- st_distance(reefs, in_bay_grd[nearest,], by_element = TRUE)
+
+
+.grid <- function(poly, cellsize, in_crs = 3175, out_crs = 4326, what = "polygons", square = TRUE){
+
+  y <- st_transform(poly, crs = in_crs)
+  x <- st_make_grid(y, what = "centers", cellsize = cellsize, square = TRUE)
+  x <- st_as_sf(x)
+  x <- st_join(x = x, y = y, left = FALSE)
+  x <- st_transform(x, crs = out_crs)
+
+  return(x)
+}
+
+################
+#' @title create a grid of receivers, taking into account mandatory receivers deployed on reefs
+#' @description Creates grid of receivers within polygon.  One receiver is located at center of each grid unless a "reef" (or other location) that needs a receiver is supplied.  If a grid contains another location "mandatory deployment" location, then other receiver deployed in grid is removed such that only one grid receiver or 1 or more mandatory receivers are deployed in each cell of grid.  Function does not assign a grid receiver to cells that contain less than 0.10*area of full cell.
+#' @param bbox bounding box of where receivers area to be deployed.  input value must be acceptable to sf::st_bbox
+#' @param inner_bay_poly polygon object containing outline of where receivers are to be deployed
+#' @param cellsize size of grid cell (x,y). Input must be appropriate for sf::st_grid and in METERS
+#' @param reefs sf points object that contains locations for required points.  In this use, they represent spawning reefs
+#' @return function returns a sf points object for each receiver location
+
+#' @examples
+#' tar_load(in_bay)
+#' inner_bay_poly <- in_bay
+#' tar_load(reefs)
+#' reefs <- reefs
+#' bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664)
+#' cellsize = c(15000,15000 )
+
+.inner_bay_rec_grid <- function(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664), inner_bay_poly = in_bay, cellsize = c(15000, 15000), reefs){
+
+  # create bounding box for inner bay and convert to crs 3175
+  bay_box  <- st_bbox(bbox, crs = 4326)
+  bay_box <- st_bbox(st_transform(st_as_sfc(bay_box), 3175))
+  in_bay <- st_transform(inner_bay_poly, 3175)
+
+  # make inner bay grid constrained by bay outline polygon
+  grd <- st_make_grid(bay_box, cellsize = cellsize)
+  grd <- st_intersection(grd, in_bay)
+  grd <- st_transform(grd, 4326)
+  in_bay <- st_transform(inner_bay_poly, 4326)
+
+  # calculate centers of each grid
+  centers <- st_centroid(grd)
+  centers <- st_sf(ID = "grd", geometry = st_sfc(centers), crs = 4326)
+
+  # combine all grid and receiver points into a single object
+  reefs$ID <- "reef"
+  all_pts <- rbind(reefs[,c("ID", "geometry")], centers)
+
+  # calculate area of cell
+  cell_area <- as.numeric(cellsize[1]*cellsize[2])
+
+  # pull all info for grid together, including number of points (either grid or reefs) in each cell.
+  grd <- st_sf(area = st_area(grd), pt_ct = lengths(st_intersects(grd, all_pts)), geometry = grd)
+  grd$prop_max <- as.numeric(grd$area)/cell_area
+
+  # Assign each point to cells that contain it.  This seems to duplicate previous command???
+  bar <- st_intersection(grd, all_pts)
+
+  # select out all reefs and center points in grid cells that do not contain reefs
+  out <- bar[bar$prop_max > 0.10 & (bar$pt_ct == 1 | bar$ID == "reef"),]
+
+  return(out)
+}
+  
+
+
+
+## out$col <- ifelse(out$ID == "reef", "red", "blue")
+## plot(st_geometry(in_bay))
+## plot(st_geometry(grd), add = TRUE)
+## plot(st_geometry(out), add = TRUE, pch = 16, col = out$col, cex = 2)
 
 
 

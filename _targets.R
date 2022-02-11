@@ -75,7 +75,7 @@ tar_target(
 
 tar_target(
   map,
-  grid_map(bathy, grid = grid_depth, sbay, reefs = reefs, rec_grid = in_bay_grd, spawn_rivers = spawn_rivs, bay_mth = bay_mth_grd, sim_fish = sim_tracks, pth = "docs/index.html"),
+  grid_map(bathy, grid = grid_depth, sbay, reefs = reefs, rec_grid = inner_bay_rec_grid, spawn_rivers = spawn_rivs, bay_mth = bay_mth_grd, sim_fish = sim_tracks, pth = "docs/index.html"),
   format = "file"
 ),
 
@@ -222,9 +222,18 @@ tar_target(
   format = "rds"
 ),
 
+# create "inner bay" receiver grid
+# also consider spatstat::nncross for nearest neighbour type analysis
+# see nngeo::st_nn function.  Prehaps easier to randomly place points in Sag Bay and then remove all points that are within a spedified distance?
+# generate random points in polygon with minimum distance from one another and from polygon boundary
+# https://gis.stackexchange.com/questions/163287/randomly-sampling-points-in-r-with-minimum-distance-constraint
+
 tar_target(
-  in_bay_grd,
-  .grid(poly = in_bay, cellsize = c(15000, 15000), in_crs = 3175, out_crs = 4326),
+  inner_bay_rec_grid,
+  .inner_bay_rec_grid(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664),
+                      cellsize = c(10000, 10000),
+                      inner_bay_poly = in_bay,
+                      reefs = reefs),
   format = "rds"
 )
     
