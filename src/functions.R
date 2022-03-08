@@ -34,57 +34,101 @@ clean_reefs <- function(x = dirty_reefs){
 #' grid_map(bathy, lidar, sentinal, rec_depth, glid_area = glider, mobile = mobile_listen)
 
 # create leaflet map
-grid_map <- function(bathy, grid, sbay, reefs, rec_grid, spawn_rivers, bay_mth, pth, sim_fish){
+## grid_map <- function(bathy, grid, sbay, reefs, rec_grid, spawn_rivers, bay_mth, pth, sim_fish, rand_grid){
 
-  sim_fish[min_dist <= 2000, col := "red"][is.na(col), col := "grey"]
-  trks <- st_as_sf(sim_fish, coords = c("X", "Y"), agr = "constant", crs = 4326)
-  trks <- st_transform(trks, 3175)
-  setDT(trks)
-  trks <- trks[, .(col = col, geometry = st_combine(geometry)), by = fish]
-  trks <- st_as_sf(trks)
-  trks <- st_cast(trks, "LINESTRING")
-  trks <- st_transform(trks, 4326)
+##   sim_fish[min_dist <= 2000, col := "red"][is.na(col), col := "grey"]
+##   trks <- st_as_sf(sim_fish, coords = c("X", "Y"), agr = "constant", crs = 4326)
+##   trks <- st_transform(trks, 3175)
+##   setDT(trks)
+##   trks <- trks[, .(col = col, geometry = st_combine(geometry)), by = fish]
+##   trks <- st_as_sf(trks)
+##   trks <- st_cast(trks, "LINESTRING")
+##   trks <- st_transform(trks, 4326)
   
-  bath <- terra::rast(bathy)
-#  bath <- terra::aggregate(bath, fact = 4)
-  bath <- stars::st_as_stars(bath)
+##   bath <- terra::rast(bathy)
+## #  bath <- terra::aggregate(bath, fact = 4)
+##   bath <- stars::st_as_stars(bath)
     
-  brks_bath <- brks(x = bath, n = 100)
-  pal_LH <- leaflet::colorNumeric(c(viridis::viridis(100)), bath[[1]], na.color = "transparent")
+##   brks_bath <- brks(x = bath, n = 100)
+##   pal_LH <- leaflet::colorNumeric(c(viridis::viridis(100)), bath[[1]], na.color = "transparent")
+
+##   # create leaflet map
+##   m <- leaflet()
+##   m <- setView(m, zoom = 15, lat = 45.537 , lng = -83.999)
+##   m <- addTiles(m)
+##   m <- leafem::addGeoRaster(m, bath, opacity = 1, colorOptions = leafem::colorOptions(palette = viridis::viridis(256), breaks = brks_bath$brks), group = "bathy (ft)")
+##   m <- addTiles(m, urlTemplate = "http://tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png", group = "nav chart")
+##   m <- addProviderTiles(m, providers$Esri.WorldImagery, group = "satellite")
+##   m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")
+##  # m <- addPolylines(map = m, data = glider_pth, lng = ~lon, lat = ~lat, color = "green")
+## #  m <- addMarkers(m, lng = -83.58845, lat = 44.08570, label = "release")
+
+##   m <- addCircleMarkers(m, data = grid, label = grid$station, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)
+##   m <- addCircleMarkers(m, data = reefs, label = ~reef, color = c("blue"),   radius = c(6),  group = "bay reefs",     stroke = FALSE, fillOpacity = 1)
+##   m <- addCircleMarkers(m, data = rec_grid, color = c("yellow"), radius = c(10), group = "proposed recs (bay grid)", stroke = FALSE, fillOpacity = 1)
+##   m <- addCircleMarkers(m, data = bay_mth, color = "orange", radius = 10, group = "proposed recs (bay mth)", stroke = FALSE, fillOpacity = 1)
+##   m <- addCircleMarkers(m, data = rand_grid, color = "yellow", radius = 10, group = "proposed recs (bay, random)", stroke = FALSE, fillOpacity = 1)
+  
+##   m <- addMarkers(m, data = spawn_rivers, label = ~river, group = "spawn rivers")
+##   m <- addGlPolylines(m, data = trks, group = "sim fish trks", color = ~col, weight = 0.5)
+                      
+## #  m <- addCircleMarkers(m, data = sync_100, label = ~label, fillColor = "yellow", radius = 8, group = "sentinel tag", stroke = FALSE, fillOpacity = 1)
+## #  m <- addCircleMarkers(m, data = all_mob, label = ~label_short, fillColor = "orange", radius = 8, group = "mobile", stroke = FALSE, fillOpacity = 1)
+##   m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "sag bay")
+##   m <- leafem::addMouseCoordinates(m)
+##   m <- addLegend(m, pal = pal_LH , values =  bath[[1]], title = "depth (ft)", opacity = 1, group = "bathy (ft)")
+## #  m <- addLegend(m, pal = pal_lidar, values = lid[[1]], title = "depth (lidar, ft)", opacity = 1, group = "lidar_depth")
+## #  m <- addLayersControl(m, overlayGroups = c("LH_depth", "lidar_depth", "receivers", "sentinel tag", "mobile", "glider patrol"), options = layersControlOptions(collapsed = FALSE))
+##   m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
+##   m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt", "bathy (ft)"), overlayGroups = c("LWF recs", "sag bay", "bay reefs", "proposed recs (bay grid)", "proposed recs (bay, random)", "spawn rivers", "proposed recs (bay mth)", "sim fish trks"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+  
+##   htmlwidgets::saveWidget(m, pth)
+
+##   return(pth)
+## }
+
+
+#' tar_load(grid)
+#' tar_load(reefs)
+#' tar_load(bay_mth_grd)
+#' tar_load(dirty_sturgeon)
+#' tar_load(dirty_lines)
+
+.plan_map <- function(grid, reefs, bay_mth_grd, dirty_sturgeon, dirty_lines, pth){
 
   # create leaflet map
   m <- leaflet()
-  m <- setView(m, zoom = 15, lat = 45.537 , lng = -83.999)
-  m <- addTiles(m)
-  m <- leafem::addGeoRaster(m, bath, opacity = 1, colorOptions = leafem::colorOptions(palette = viridis::viridis(256), breaks = brks_bath$brks), group = "bathy (ft)")
+  m <- setView(m, zoom = 10, lat = 43.92460, lng = -83.48373)
   m <- addTiles(m, urlTemplate = "http://tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png", group = "nav chart")
   m <- addProviderTiles(m, providers$Esri.WorldImagery, group = "satellite")
-  m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")
- # m <- addPolylines(map = m, data = glider_pth, lng = ~lon, lat = ~lat, color = "green")
-#  m <- addMarkers(m, lng = -83.58845, lat = 44.08570, label = "release")
+  m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")  
+  m <- addCircleMarkers(m, data = grid, label = grid$station, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)  
+  m <- addCircleMarkers(m, data = reefs, label = ~reef, color = c("blue"),   radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = bay_mth_grd, color = "orange", radius = 6, group = "bay_mouth", stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = dirty_sturgeon, color = "green", radius = 6, group = "proposed_sturgeon", label = ~Comments, stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = dirty_lines, color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1)
 
-  m <- addCircleMarkers(m, data = grid, label = grid$station, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = reefs, label = ~reef, color = c("blue"),   radius = c(6),  group = "bay reefs",     stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = rec_grid, color = c("yellow"), radius = c(10), group = "proposed recs (bay grid)", stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = bay_mth, color = "orange", radius = 10, group = "proposed recs (bay mth)", stroke = FALSE, fillOpacity = 1)
-  m <- addMarkers(m, data = spawn_rivers, label = ~river, group = "spawn rivers")
-  m <- addGlPolylines(m, data = trks, group = "sim fish trks", color = ~col, weight = 0.5)
+  #m <- addCircleMarkers(m, data = bay_mth, color = "orange", radius = 10, group = "proposed recs (bay mth)", stroke = FALSE, fillOpacity = 1)
+#  m <- addCircleMarkers(m, data = rec_grid, color = c("yellow"), radius = c(10), group = "proposed recs (bay grid)", stroke = FALSE, fillOpacity = 1)
+#  m <- addCircleMarkers(m, data = rand_grid, color = "yellow", radius = 10, group = "proposed recs (bay, random)", stroke = FALSE, fillOpacity = 1)
+  
+ # m <- addMarkers(m, data = spawn_rivers, label = ~river, group = "spawn rivers")
+ # m <- addGlPolylines(m, data = trks, group = "sim fish trks", color = ~col, weight = 0.5)
                       
 #  m <- addCircleMarkers(m, data = sync_100, label = ~label, fillColor = "yellow", radius = 8, group = "sentinel tag", stroke = FALSE, fillOpacity = 1)
 #  m <- addCircleMarkers(m, data = all_mob, label = ~label_short, fillColor = "orange", radius = 8, group = "mobile", stroke = FALSE, fillOpacity = 1)
-  m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "sag bay")
+ # m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "sag bay")
   m <- leafem::addMouseCoordinates(m)
-  m <- addLegend(m, pal = pal_LH , values =  bath[[1]], title = "depth (ft)", opacity = 1, group = "bathy (ft)")
+ # m <- addLegend(m, pal = pal_LH , values =  bath[[1]], title = "depth (ft)", opacity = 1, group = "bathy (ft)")
 #  m <- addLegend(m, pal = pal_lidar, values = lid[[1]], title = "depth (lidar, ft)", opacity = 1, group = "lidar_depth")
 #  m <- addLayersControl(m, overlayGroups = c("LH_depth", "lidar_depth", "receivers", "sentinel tag", "mobile", "glider patrol"), options = layersControlOptions(collapsed = FALSE))
-    m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
-  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt", "bathy (ft)"), overlayGroups = c("LWF recs", "sag bay", "bay reefs", "proposed recs (bay grid)", "spawn rivers", "proposed recs (bay mth)", "sim fish trks"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+  m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
+  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "bay_mouth", "proposed_sturgeon", "proposed_walleye"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
   
   htmlwidgets::saveWidget(m, pth)
 
   return(pth)
 }
-
 
 
 #################
@@ -1181,21 +1225,114 @@ check_in_polygon <- function(points, polygon, EPSG){
   return(out)
 }
   
-
-
-
 ## out$col <- ifelse(out$ID == "reef", "red", "blue")
 ## plot(st_geometry(in_bay))
 ## plot(st_geometry(grd), add = TRUE)
 ## plot(st_geometry(out), add = TRUE, pch = 16, col = out$col, cex = 2)
 
 
+# random sampling with distance constraint
+# https://rpubs.com/jguelat/sampling
+# https://rdrr.io/github/raff-k/Lslide/src/R/genRandomPnts.R
+# https://stackoverflow.com/questions/11178414/algorithm-to-generate-equally-distributed-points-in-a-polygon
+
+# Lslide library installed from github (raff-k/Lslide)
+# installed using remotes::install_github("raff-k/Lslide")
+
+#' @title Find random points (i.e., receivers) in area that are separated by specified distance
+#' @description Finds random points within polygon that are separated by a specified distance.  All spatial objects must be in same CRS in meters.  This function can use multiple cores and is a simple wrapper on spatstat.core::rSSI.  Orignal code was adapted from Lslides::genRandomPnts_updated.
+#' @param in_poly polygon where points are to be distributed
+#' @param exist_pts initial points that will be included in random point field.  In this project, represents reefs that must have receivers on them.
+#' @param dist minimum distance between receivers in meters
+#' @return function returns a sfc point object with the max number of points available that are separated by specified distance in polygon.
+#'
+#' @examples
+#' tar_load(in_bay)
+#' bay_poly <- st_transform(in_bay, 3175)
+#' tar_load(reefs)
+#' reefs <- st_transform(reefs, 3175)
+#' dist = 8000
+#' in_poly = bay_poly
+#' exist_pts = reefs
+#' cores = 4
+#'
+#'out <- rand_pts(in_poly = bay_poly, exist_pts = reefs, dist = 2000, cores = 4)
+#' 
+#' plot(st_geometry(bay_poly))
+#' plot(st_geometry(out), add = TRUE, pch = 16, col = "red")
+#' plot(st_geometry(bay_reefs), add = TRUE, pch = 16, col = "blue", cex = 0.5)
 
 
+random_pts <- function(in_poly = bay_poly, exist_pts = reefs, dist = 8000, cores = 4){
+
+  in_poly <- st_transform(in_poly, crs = 3175)
+  exist_pts <- st_transform(exist_pts, crs = 3175)
+  coords <- as.data.frame(st_coordinates(exist_pts))
+  foo <- as.ppp(X = coords, W = in_poly)
+
+  out <- genRandomPnts_updated(x = in_poly, seed = 123, dist = dist, n = Inf, maxit = 100, quiet = FALSE, cores = cores, x.init = foo)
+  out <- st_transform(out, 4326)
+
+  return(out)
+}
 
 
+genRandomPnts_updated <- function (x, seed = 123, dist = NULL, n = Inf, maxit = 100, quiet = TRUE, 
+    cores = 1, ...) 
+{
+    process.time.start <- proc.time()
+    crs <- sf::st_crs(x = x)
+    x.sp <- x %>% as(., "Spatial") %>% as(., "SpatialPolygons")
+    x.owin <- x.sp %>% slot(., "polygons") %>% lapply(X = ., 
+        FUN = function(x) {
+            sp::SpatialPolygons(list(x))
+        }) %>% lapply(X = ., FUN = maptools::as.owin.SpatialPolygons)
+    cl <- parallel::makeCluster(cores)
+    parallel::clusterExport(cl = cl, varlist = ls(), envir = environment())
+    pts.ppp <- parallel::parLapply(cl = cl, X = 1:length(x.owin), 
+        fun = function(i, x.owin, r, n, quiet, seed, maxit, ...) {
+            set.seed(seed)
+            pts.out <- spatstat.core::rSSI(r = r, n = n, giveup = maxit, 
+                win = x.owin[[i]], ...)
+            return(list(pts.out, rep(i, pts.out$n)))
+        }, quiet = quiet, x.owin = x.owin, r = dist, n = n, seed = seed, 
+        maxit = maxit, ...)
+    parallel::stopCluster(cl)
+    pts.sf <- lapply(X = pts.ppp, FUN = "[[", 1) %>% lapply(X = ., 
+        FUN = function(x) sf::st_as_sfc(as(x, "SpatialPoints"))) %>% 
+        do.call(c, .)
+    pts.sf <- sf::st_sf(ID = 1:length(pts.sf), geometry = pts.sf, 
+        crs = crs)
+    pts.inter.x <- sf::st_intersects(x = pts.sf, y = x) %>% unlist
+    if (length(pts.inter.x) != nrow(pts.sf)) {
+        warning("Some sample points are inside multiple polygons")
+        if (length(unlist(lapply(X = pts.ppp, FUN = "[[", 2))) == 
+            nrow(pts.sf)) {
+            pts.sf$In <- unlist(lapply(X = pts.ppp, FUN = "[[", 
+                2))
+        }
+    }
+    else {
+        pts.sf$In <- pts.inter.x
+    }
+    process.time.run <- proc.time() - process.time.start
+    if (quiet == FALSE) 
+        cat(paste0("------ Run of genRandomPtsDist: ", round(x = process.time.run["elapsed"][[1]]/60, 
+            digits = 3), " Minutes ------\n"))
+    return(pts.sf)
+}
 
 
+###########################3
+# combine pts into a single table
+#' tar_load(reefs)
+#' tar_load(inner_bay_rec_grid_rand)
+#' tar_load(spawn_rivs)
+#' tar_load(bay_mth_grd)
+
+#' tst <- list(reefs, inner_bay_rec_grid_rand, spawn_rivs, bay_mth_grd)
+#' tst <- st_as_sf(data.table::rbindlist(tst, fill = TRUE, idcol = "group_id"))
+#' st_write(tst, "walleye_pts.csv", layer_options = "GEOMETRY=AS_XY")
 
 
 
