@@ -94,7 +94,7 @@ clean_reefs <- function(x = dirty_reefs){
 #' tar_load(dirty_sturgeon)
 #' tar_load(dirty_lines)
 
-.plan_map <- function(grid, reefs, bay_mth_grd, dirty_sturgeon, dirty_lines, pth){
+.plan_map <- function(grid, reefs, bay_mth_grd, dirty_sturgeon, dirty_lines, grid5km, grid10km, grid15km, pth){
 
   # create leaflet map
   m <- leaflet()
@@ -107,6 +107,10 @@ clean_reefs <- function(x = dirty_reefs){
   m <- addCircleMarkers(m, data = bay_mth_grd, color = "orange", radius = 6, group = "bay_mouth", stroke = FALSE, fillOpacity = 1)
   m <- addCircleMarkers(m, data = dirty_sturgeon, color = "green", radius = 6, group = "proposed_sturgeon", label = ~Comments, stroke = FALSE, fillOpacity = 1)
   m <- addCircleMarkers(m, data = dirty_lines, color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = grid10km, color = "yellow", radius = 6, group = "grid_10km", label = ~ID, stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = grid5km, color = "brown", radius = 6, group = "grid_5km", label = ~ID, stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = grid15km, color = "#F5DEB3", radius = 6, group = "grid_15km", label = ~ID, stroke = FALSE, fillOpacity = 1)
+  
 
   #m <- addCircleMarkers(m, data = bay_mth, color = "orange", radius = 10, group = "proposed recs (bay mth)", stroke = FALSE, fillOpacity = 1)
 #  m <- addCircleMarkers(m, data = rec_grid, color = c("yellow"), radius = c(10), group = "proposed recs (bay grid)", stroke = FALSE, fillOpacity = 1)
@@ -123,7 +127,7 @@ clean_reefs <- function(x = dirty_reefs){
 #  m <- addLegend(m, pal = pal_lidar, values = lid[[1]], title = "depth (lidar, ft)", opacity = 1, group = "lidar_depth")
 #  m <- addLayersControl(m, overlayGroups = c("LH_depth", "lidar_depth", "receivers", "sentinel tag", "mobile", "glider patrol"), options = layersControlOptions(collapsed = FALSE))
   m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
-  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "bay_mouth", "proposed_sturgeon", "proposed_walleye"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "bay_mouth", "proposed_sturgeon", "proposed_walleye", "grid_10km", "grid_5km", "grid_15km"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
   
   htmlwidgets::saveWidget(m, pth)
 
@@ -1334,6 +1338,27 @@ genRandomPnts_updated <- function (x, seed = 123, dist = NULL, n = Inf, maxit = 
 #' tst <- st_as_sf(data.table::rbindlist(tst, fill = TRUE, idcol = "group_id"))
 #' st_write(tst, "walleye_pts.csv", layer_options = "GEOMETRY=AS_XY")
 
+##' @title utility function that creates basic table of coordinates using flextable
+#' @description creates simple flextable for use within rmarkdown to output list of coordinates
+#' @param out_tbl data.table of information to output in report
 
-
+coords_table <- function(out_tbl){#, path = "output/juv_coords.html"){
+  flex <- flextable::flextable(out_tbl)
+  flex <- flextable::fontsize(flex, part = "all", size = 12)
+  flex <- flextable::bold(flex, part = "header")
+  flex <- flextable::theme_zebra(flex)
+  flex <- flextable::autofit(flex)
+  flex <- flextable::align(flex, align = "center", part = "all")
+#  flex <- flextable::add_header_row(flex, values = "", colwidths = 6)
+#  flex <- flextable::add_header_row(flex, values = paste("as of:", as.Date(Sys.time()), sep = " "),
+#                                    colwidths = 6)
+#  flex <- flextable::add_header_row(flex, values = "Juvenile cisco gear deployment", colwidths = 6)
+#  flex <- flextable::fontsize(flex, i = 1, part = "header", size = 24)
+#  flex <- flextable::bold(flex, part = "header", i = 1)
+#  flex <- flextable::fontsize(flex, i = 2, part = "header", size = 12)
+#  flex <- flextable::align(flex, align = "center", part = "header", i = 2)
+  #save_as_html(flex, path = path, title = "Juv cisco") 
+  #return(path)
+  return(flex)
+}
 

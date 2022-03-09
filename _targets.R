@@ -59,7 +59,7 @@ list(
   # write out planning map
   tar_target(
     plan_map,
-    .plan_map(grid, reefs, bay_mth_grd, dirty_sturgeon, dirty_lines, pth = "output/comb_plan_map.html"),
+    .plan_map(grid, reefs, bay_mth_grd, dirty_sturgeon, dirty_lines, grid5km = grid_5km, grid10km = grid_10km, grid15km = grid_15km, pth = "output/comb_plan_map.html"),
     format = "file"
   ),
   
@@ -121,10 +121,11 @@ tar_target(
   format = "file"
 ),
 
+# hard coded release locations!!!! this is going to be a problem!!!!
 tar_target(
   dirty_sturgeon,
   {out <- as.data.table(read_xlsx(path = sturgeon, range = "Sheet1!A1:D16"));
-    out <- out[1, id := "Rel"][is.na(id), id := "rec_pt"]
+    out <- out[c(1,3,5,9), id := "Rel"][is.na(id), id := "rec_pt"]
     out <- st_as_sf(out, coords = c("Longitude", "Latitide"), crs = 4326, agr = "constant")
   },
   format = "rds"
@@ -205,9 +206,14 @@ tar_target(
   LH,
   crop(GL_poly, xmin = -84.387, xmax = -82.0915, ymin = 43, ymax = 45),
   format = "rds"
-)
+),
 
-)
+tar_render(
+  dtc_summary,
+  "src/coords.rmd",
+  output_dir = "output",
+  output_file = "rec_coords.html"
+),
 
 
 # create simulated tracks.  Adjust inputs in "crw_in_polygon_updated" to change nature of tracks
@@ -294,6 +300,40 @@ tar_target(
 ##                       reefs = reefs),
 ##   format = "rds"
 ## ),
+
+
+# grid entire sag bay
+# 5 km
+tar_target(
+  grid_5km,
+  .inner_bay_rec_grid(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664),
+                      cellsize = c(5000, 5000),
+                      inner_bay_poly = sbay,
+                      reefs = reefs),
+  format = "rds"
+),
+
+# 10 km
+tar_target(
+  grid_10km,
+  .inner_bay_rec_grid(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664),
+                      cellsize = c(10000, 10000),
+                      inner_bay_poly = sbay,
+                      reefs = reefs),
+  format = "rds"
+),
+
+# 15 km
+tar_target(
+  grid_15km,
+  .inner_bay_rec_grid(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664),
+                      cellsize = c(15000, 15000),
+                      inner_bay_poly = sbay,
+                      reefs = reefs),
+  format = "rds"
+)
+
+)
 
 ## tar_target(
 ##   inner_bay_rec_grid_rand,
