@@ -10,6 +10,8 @@
 clean_reefs <- function(x = dirty_reefs){
   x[, c("Long", "Lat") := list(as.numeric(sub("\\p{So}", "", x$Long, perl = TRUE)), as.numeric(sub("\\p{So}", "", x$Lat, perl = TRUE)))]
   x <- x[, c("Reef", "Lat", "Long")]
+  x[, `:=` (glatos_array = c("COR", "DCK", "NIR", "TWR", "LCR"), station_no = c(1,1,1,1,1))]
+  x[, site := paste(glatos_array, station_no, sep = "-")]
   setnames(x, names(x), tolower(names(x)))
   x <- st_as_sf(x, coords = c("long", "lat"), remove = FALSE, crs = 4326, agr = "constant")
   return(x)
@@ -94,7 +96,7 @@ clean_reefs <- function(x = dirty_reefs){
 #' tar_load(dirty_sturgeon)
 #' tar_load(dirty_lines)
 
-.plan_map <- function(grid, reefs, bay_mth_grd, dirty_sturgeon, dirty_lines, grid5km, grid10km, grid15km, pth){
+.plan_map <- function(grid, reefs, dirty_lines, grid10km, bay_outline, pth, write = TRUE){
 
   # create leaflet map
   m <- leaflet()
@@ -103,13 +105,13 @@ clean_reefs <- function(x = dirty_reefs){
   m <- addProviderTiles(m, providers$Esri.WorldImagery, group = "satellite")
   m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")  
   m <- addCircleMarkers(m, data = grid, label = grid$station, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)  
-  m <- addCircleMarkers(m, data = reefs, label = ~reef, color = c("blue"),   radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = bay_mth_grd, color = "orange", radius = 6, group = "bay_mouth", stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = dirty_sturgeon, color = "green", radius = 6, group = "proposed_sturgeon", label = ~Comments, stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = reefs, label = ~site, color = c("blue"),   radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1)
+  #m <- addCircleMarkers(m, data = bay_mth_grd, color = "orange", radius = 6, group = "bay_mouth", stroke = FALSE, fillOpacity = 1)
+  #m <- addCircleMarkers(m, data = dirty_sturgeon, color = "green", radius = 6, group = "proposed_sturgeon", label = ~Comments, stroke = FALSE, fillOpacity = 1)
   m <- addCircleMarkers(m, data = dirty_lines, color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = grid10km, color = "yellow", radius = 6, group = "grid_10km", label = ~ID, stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = grid5km, color = "brown", radius = 6, group = "grid_5km", label = ~ID, stroke = FALSE, fillOpacity = 1)
-  m <- addCircleMarkers(m, data = grid15km, color = "#F5DEB3", radius = 6, group = "grid_15km", label = ~ID, stroke = FALSE, fillOpacity = 1)
+  m <- addCircleMarkers(m, data = grid10km, color = "yellow", radius = 6, group = "grid_10km", label = ~SITE, stroke = FALSE, fillOpacity = 1)
+ # m <- addCircleMarkers(m, data = grid5km, color = "brown", radius = 6, group = "grid_5km", label = ~ID, stroke = FALSE, fillOpacity = 1)
+#  m <- addCircleMarkers(m, data = grid15km, color = "#F5DEB3", radius = 6, group = "grid_15km", label = ~ID, stroke = FALSE, fillOpacity = 1)
   
 
   #m <- addCircleMarkers(m, data = bay_mth, color = "orange", radius = 10, group = "proposed recs (bay mth)", stroke = FALSE, fillOpacity = 1)
@@ -121,18 +123,24 @@ clean_reefs <- function(x = dirty_reefs){
                       
 #  m <- addCircleMarkers(m, data = sync_100, label = ~label, fillColor = "yellow", radius = 8, group = "sentinel tag", stroke = FALSE, fillOpacity = 1)
 #  m <- addCircleMarkers(m, data = all_mob, label = ~label_short, fillColor = "orange", radius = 8, group = "mobile", stroke = FALSE, fillOpacity = 1)
- # m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "sag bay")
+  m <- addPolygons(map = m, data = bay_outline, color  = "red", fillColor = NA, group = "sag bay")
   m <- leafem::addMouseCoordinates(m)
  # m <- addLegend(m, pal = pal_LH , values =  bath[[1]], title = "depth (ft)", opacity = 1, group = "bathy (ft)")
 #  m <- addLegend(m, pal = pal_lidar, values = lid[[1]], title = "depth (lidar, ft)", opacity = 1, group = "lidar_depth")
 #  m <- addLayersControl(m, overlayGroups = c("LH_depth", "lidar_depth", "receivers", "sentinel tag", "mobile", "glider patrol"), options = layersControlOptions(collapsed = FALSE))
   m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
-  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "bay_mouth", "proposed_sturgeon", "proposed_walleye", "grid_10km", "grid_5km", "grid_15km"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
-  
-  htmlwidgets::saveWidget(m, pth)
+  m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
 
-  return(pth)
+  if(write == TRUE){
+    htmlwidgets::saveWidget(m, pth)
+    return(pth)
+  }
+
+  if(write == FALSE){
+    return(m)
+  }
 }
+
 
 
 #################
@@ -1185,30 +1193,46 @@ check_in_polygon <- function(points, polygon, EPSG){
 #' @return function returns a sf points object for each receiver location
 
 #' @examples
-#' tar_load(in_bay)
-#' inner_bay_poly <- in_bay
+#' tar_load(sbay)
+#' inner_bay_poly = sbay
 #' tar_load(reefs)
 #' reefs <- reefs
 #' bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664)
 #' cellsize = c(15000,15000 )
 
-.inner_bay_rec_grid <- function(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664), inner_bay_poly = in_bay, cellsize = c(15000, 15000), reefs){
+.inner_bay_rec_grid <- function(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664), inner_bay_poly = in_bay, cellsize = c(15000, 15000), reefs, all_dups = FALSE){
 
   # create bounding box for inner bay and convert to crs 3175
   bay_box  <- st_bbox(bbox, crs = 4326)
   bay_box <- st_bbox(st_transform(st_as_sfc(bay_box), 3175))
   in_bay <- st_transform(inner_bay_poly, 3175)
+  in_bay <- st_buffer(in_bay, dist = -2000)
 
   # make inner bay grid constrained by bay outline polygon
-  grd <- st_make_grid(bay_box, cellsize = cellsize)
+  grd <- st_make_grid(bay_box, cellsize = cellsize, offset = c(946357, 783597))
   grd <- st_intersection(grd, in_bay)
   grd <- st_transform(grd, 4326)
   in_bay <- st_transform(inner_bay_poly, 4326)
+  cell_area <- st_sf(cell_area = st_area(grd), max_area = as.numeric(cellsize[1]*cellsize[2]), geometry = grd)
+  cell_area$prop_max <- as.numeric(cell_area$cell_area)/cell_area$max_area
+  cell_area <- cell_area[cell_area$prop_max > 0.10,]
+  cell_area <- st_centroid(cell_area)
+  cell_area$GLATOS_ARRAY <- "SBG"
+  cell_area$STATION_NO <- 1:(nrow(cell_area))
+  cell_area$SITE <- paste(cell_area$GLATOS_ARRAY, cell_area$STATION_NO, sep = "-")
+  
 
+  if(all_dups == TRUE) return(cell_area)
+  
   # calculate centers of each grid
   centers <- st_centroid(grd)
   centers <- st_sf(ID = "grd", geometry = st_sfc(centers), crs = 4326)
+   
 
+   # calculate area of cells
+  cell_area <- as.numeric(cellsize[1]*cellsize[2])
+
+  
   # combine all grid and receiver points into a single object
   reefs$ID <- "reef"
   all_pts <- rbind(reefs[,c("ID", "geometry")], centers)

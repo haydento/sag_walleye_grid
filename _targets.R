@@ -59,7 +59,7 @@ list(
   # write out planning map
   tar_target(
     plan_map,
-    .plan_map(grid, reefs, bay_mth_grd, dirty_sturgeon, dirty_lines, grid5km = grid_5km, grid10km = grid_10km, grid15km = grid_15km, pth = "output/comb_plan_map.html"),
+    .plan_map(grid, reefs, dirty_lines, grid10km = grid_10km_dup_reefs, bay_outline = sbay, pth = "output/comb_plan_map.html", write = TRUE),
     format = "file"
   ),
   
@@ -142,8 +142,11 @@ tar_target(
 tar_target(
   dirty_lines,
   {out <- fread(rec_lines);
-    out[, `:=`(center_lat = mean(DEPLOY_LAT), center_lon = mean(DEPLOY_LONG)), by = .(GLATOS_ARRAY, STATION_NO)]
-    out[, `:=`(site = paste(GLATOS_ARRAY, STATION_NO, CONSECUTIVE_DEPLOY_NO, sep = "_"))]
+    out <- out[GLATOS_ARRAY %in% c("HBC", "OSC"),];
+    out <- out[STATION_NO %% 2 == 1,];
+    out[,STATION_NO := 1:.N, by = .(GLATOS_ARRAY)]
+#    out[, `:=`(center_lat = mean(DEPLOY_LAT), center_lon = mean(DEPLOY_LONG)), by = .(GLATOS_ARRAY, STATION_NO)]
+    out[, `:=`(site = paste(GLATOS_ARRAY, STATION_NO, sep = "_"))]
     out<- st_as_sf(out, coords = c("DEPLOY_LONG", "DEPLOY_LAT"), agr = "constant", crs = 4326)
     },  
   format = "rds"
@@ -211,8 +214,8 @@ tar_target(
 tar_render(
   dtc_summary,
   "src/coords.rmd",
-  output_dir = "output",
-  output_file = "rec_coords.html"
+  output_dir = "docs",
+  output_file = "index.html"
 ),
 
 
@@ -320,6 +323,17 @@ tar_target(
                       cellsize = c(10000, 10000),
                       inner_bay_poly = sbay,
                       reefs = reefs),
+  format = "rds"
+),
+
+# 10 km base grid(includes both recevier and grid points, some overlap)
+tar_target(
+  grid_10km_dup_reefs,
+  .inner_bay_rec_grid(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664),
+                      cellsize = c(10000, 10000),
+                      inner_bay_poly = sbay,
+                      reefs = reefs,
+                      all_dups = TRUE),
   format = "rds"
 ),
 

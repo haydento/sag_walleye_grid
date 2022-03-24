@@ -1,0 +1,110 @@
+---
+title: "Receiver deployment locations- Walleye sources of reproduction"
+date: "as of `r format(Sys.time(), '%m/%d/%Y %H:%M')` "
+output:
+  html_document
+---
+
+<style type="text/css">
+
+h1.title {
+	font-size: 34px;
+	text-align: center;
+	}
+	
+h4.date {
+   font-size: 18px;
+   text-align: center;
+   }
+
+}
+   	
+</style>
+
+<br><br>
+
+# Receiver map
+
+```{r, echo = FALSE, out.width = '100%'}
+
+tar_load(reefs)
+tar_load(grid)
+tar_load(dirty_lines)
+tar_load(grid_10km_dup_reefs)
+tar_load(sbay)
+## .plan_map(grid, reefs, dirty_lines, grid10km = grid_10km_dup_reefs, bay_outline = sbay)
+
+  # create leaflet map
+m <- leaflet(height = 1000, width = 1000)
+m <- setView(m, zoom = 10, lat = 43.92460, lng = -83.48373)
+m <- addTiles(m, urlTemplate = "http://tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png", group = "nav chart")
+m <- addProviderTiles(m, providers$Esri.WorldImagery, group = "satellite")
+m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")
+m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "sag bay")
+m <- addCircleMarkers(m, data = grid, label = grid$station, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)  
+m <- addCircleMarkers(m, data = reefs, label = ~site, color = c("blue"), radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1)
+m <- addCircleMarkers(m, data = dirty_lines, color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1)
+m <- addCircleMarkers(m, data = grid_10km_dup_reefs, color = "yellow", radius = 6, group = "grid_10km", label = ~SITE, stroke = FALSE, fillOpacity = 1)
+m <- leafem::addMouseCoordinates(m)
+m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
+m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+m
+```
+<br><br>
+
+# Coordinates
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+
+tar_load(reefs)
+
+coords <- as.data.table(st_coordinates(reefs))
+reefs <- as.data.table(st_drop_geometry(st_as_sf(reefs)))
+reefs <- cbind(reefs, coords)
+setnames(reefs, c("X", "Y"), c("longitude", "latitude"))
+reefs <- reefs[, c("site", "glatos_array", "station_no", "longitude", "latitude")]
+
+## tar_load(bay_mth_grd)
+## coords <- as.data.table(st_coordinates(bay_mth_grd))
+## coords[, `:=` (glatos_array = rep("SBG", n = nrow(coords)), station_no = 1:nrow(coords))]
+## coords[, `:=` (ID = paste(glatos_array, station_no, sep = "-"))]
+## setnames(coords, c("X", "Y"), c("longitude", "latitude"))
+## bay_grd <- coords
+
+## tar_load(dirty_sturgeon)
+## ds <- dirty_sturgeon[dirty_sturgeon$id == "rec_pt",]
+## coords <- as.data.table(st_coordinates(ds))
+## ds <- as.data.table(st_drop_geometry(st_as_sf(ds)))
+## ds[, `:=` (glatos_array = c("TRL", "CRL", "FRS", "FRL", "FRL", "SRL", "SRL", "SRS", "SRS", "SRS", "SRS"), station_no = c(1,1,1,1,2,1,2,1,2,3,4))]
+## ds <- ds[, `:=` (ID = paste(glatos_array, station_no, sep = "-"))]
+## ds <- cbind(ds, coords)
+## setnames(ds, c("X", "Y"), c("longitude", "latitude"))
+## ds <- ds[, c("ID", "glatos_array", "station_no", "longitude", "latitude")]
+
+tar_load(dirty_lines)
+coords <- as.data.table(st_coordinates(dirty_lines))
+dl <- as.data.table(st_drop_geometry(st_as_sf(dirty_lines)))
+dl <- dl[, c("GLATOS_ARRAY", "STATION_NO", "site"),]
+dl <- cbind(dl, coords)
+setnames(dl, c("X", "Y", "GLATOS_ARRAY", "STATION_NO"), c("longitude", "latitude", "glatos_array", "station_no"))
+#dl <- dl[, `:=` (ID = paste(glatos_array, station_no, sep = "-"))]
+
+tar_load(grid_10km_dup_reefs)
+crds <- as.data.table(st_coordinates(grid_10km_dup_reefs))
+dta <- as.data.table(st_drop_geometry(st_as_sf(grid_10km_dup_reefs)))
+dta <- dta[, c("GLATOS_ARRAY", "STATION_NO", "SITE"),]
+dta <- cbind(dta, crds)
+setnames(dta, c("X", "Y", "GLATOS_ARRAY", "STATION_NO", "SITE"), c("longitude", "latitude", "glatos_array", "station_no", "site"))
+
+tot <- rbind(reefs, dl, dta)
+tot[, ID := 1:nrow(tot)]
+coords_table(out_tbl = tot)
+
+fwrite(tot, "output/receivers.csv")
+
+# see links below for info about customizing output.
+# https://babichmorrowc.github.io/post/changing-fonts-in-rmarkdown-pdfs/
+# used flextable to style table
+
+```
+
