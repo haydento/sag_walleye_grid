@@ -5,7 +5,7 @@ source("src/glider_funcs.R")
 source("src/util_funcs.R")
 options(tidyverse.quiet = TRUE)
 
-tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl", "leafgl", "spatstat.core"))
+tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl", "leafgl", "spatstat.core", "tidyverse"))
 
 list(
   # load path to range curve data collected by Binder in 2016 in GB with V13 tags
@@ -345,7 +345,15 @@ tar_target(
                       inner_bay_poly = sbay,
                       reefs = reefs),
   format = "rds"
+),
+
+# adjusted grid to avoid shipping lanes, shallow water, etc
+tar_target(
+  raw_adj_grid,
+  "data/grid_adj_20220621.csv",
+  format = "file"
 )
+
 
 )
 

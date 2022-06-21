@@ -611,4 +611,14 @@ find_parallel_lines_split_start <- function(start_lat, start_lon, end_lon, end_l
 
 
   
-  
+# new access to navigation maps via WMS server with leaflet (2022-06-21) 
+#leaflet() %>%
+#setView(lng = -83.04167, lat = 44.37500, zoom = 9) %>%
+#  addWMSTiles("https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/NOAAChartDisplay/MapServer/exts/MaritimeChartService/WMSServer", layers = c(1,2,3,4,5,6,7), o#ptions = WMSTileOptions(format = "image/png", transparent = TRUE))
+
+
+################
+#leaflet() %>%
+#setView(lng = -83.04167, lat = 44.37500, zoom = 9) %>%
+#  addWMSTiles("https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/ENCOnline/MapServer/exts/MaritimeChartService/WMSServer", layers = c(1,2,3,4,5,6,7), options #= WMSTileOptions(format = "image/png", transparent = TRUE))
+
