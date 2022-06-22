@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<gpx version="1.1" creator="GDAL 3.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<metadata><bounds minlat="43.677680000000002" minlon="-83.850520569147122" maxlat="44.451949999999997" maxlon="-82.568730000000002"/></metadata>                
+<wpt lat="43.73802" lon="-83.68583">
+  <name>COR_1</name>
+</wpt>
+<wpt lat="43.84256" lon="-83.48641">
+  <name>DCK_1</name>
+</wpt>
+<wpt lat="43.87654" lon="-83.45053">
+  <name>NIR_1</name>
+</wpt>
+<wpt lat="44.260541" lon="-83.483046">
+  <name>TWR_1</name>
+</wpt>
+<wpt lat="44.00736" lon="-83.47688">
+  <name>LCR_1</name>
+</wpt>
+<wpt lat="43.87161" lon="-82.63966">
+  <name>HBC_1</name>
+</wpt>
+<wpt lat="43.87681" lon="-82.61624">
+  <name>HBC_2</name>
+</wpt>
+<wpt lat="43.88214" lon="-82.59209">
+  <name>HBC_3</name>
+</wpt>
+<wpt lat="43.88742" lon="-82.56873">
+  <name>HBC_4</name>
+</wpt>
+<wpt lat="44.45195" lon="-83.31855">
+  <name>OSC_1</name>
+</wpt>
+<wpt lat="44.45158" lon="-83.29331">
+  <name>OSC_2</name>
+</wpt>
+<wpt lat="44.45165" lon="-83.26799">
+  <name>OSC_3</name>
+</wpt>
+<wpt lat="44.45155" lon="-83.24261">
+  <name>OSC_4</name>
+</wpt>
+<wpt lat="44.45146" lon="-83.21752">
+  <name>OSC_5</name>
+</wpt>
+<wpt lat="44.45151" lon="-83.19199">
+  <name>OSC_6</name>
+</wpt>
+<wpt lat="43.694" lon="-83.84483">
+  <name>SBG_1</name>
+</wpt>
+<wpt lat="43.67768" lon="-83.7185">
+  <name>SBG_2</name>
+</wpt>
+<wpt lat="43.681988146948946" lon="-83.633601726376426">
+  <name>SBG_3</name>
+</wpt>
+<wpt lat="43.756520968708145" lon="-83.850520569147122">
+  <name>SBG_4</name>
+</wpt>
+<wpt lat="43.758460838076026" lon="-83.72909036273235">
+  <name>SBG_5</name>
+</wpt>
+<wpt lat="43.76006" lon="-83.59945">
+  <name>SBG_6</name>
+</wpt>
+<wpt lat="43.79985" lon="-83.53233">
+  <name>SBG_7</name>
+</wpt>
+<wpt lat="43.846979643101946" lon="-83.841643854304365">
+  <name>SBG_8</name>
+</wpt>
+<wpt lat="43.848345516175804" lon="-83.729834700591937">
+  <name>SBG_9</name>
+</wpt>
+<wpt lat="43.848813993425011" lon="-83.605310134454825">
+  <name>SBG_10</name>
+</wpt>
+<wpt lat="43.8729" lon="-83.47172">
+  <name>SBG_11</name>
+</wpt>
+<wpt lat="43.9285" lon="-83.813">
+  <name>SBG_12</name>
+</wpt>
+<wpt lat="43.932366595483572" lon="-83.729823434501867">
+  <name>SBG_13</name>
+</wpt>
+<wpt lat="43.93746" lon="-83.62099">
+  <name>SBG_14</name>
+</wpt>
+<wpt lat="43.94043" lon="-83.50615">
+  <name>SBG_15</name>
+</wpt>
+<wpt lat="43.959580864608483" lon="-83.360030707004796">
+  <name>SBG_16</name>
+</wpt>
+<wpt lat="44.01094" lon="-83.58584">
+  <name>SBG_17</name>
+</wpt>
+<wpt lat="44.03454" lon="-83.49397">
+  <name>SBG_18</name>
+</wpt>
+<wpt lat="44.029088615754681" lon="-83.356590988531181">
+  <name>SBG_19</name>
+</wpt>
+<wpt lat="44.035093000439907" lon="-83.234209426527073">
+  <name>SBG_20</name>
+</wpt>
+<wpt lat="44.04722" lon="-83.10695">
+  <name>SBG_21</name>
+</wpt>
+<wpt lat="44.118651527423019" lon="-83.480780615224447">
+  <name>SBG_22</name>
+</wpt>
+<wpt lat="44.118958289801178" lon="-83.356759032054427">
+  <name>SBG_23</name>
+</wpt>
+<wpt lat="44.119009246774596" lon="-83.231649647938553">
+  <name>SBG_24</name>
+</wpt>
+<wpt lat="44.111157300012145" lon="-83.117022862366412">
+  <name>SBG_25</name>
+</wpt>
+<wpt lat="44.201035091660422" lon="-83.475401386597454">
+  <name>SBG_26</name>
+</wpt>
+<wpt lat="44.208734570941921" lon="-83.3568019878699">
+  <name>SBG_27</name>
+</wpt>
+<wpt lat="44.200282235188496" lon="-83.243163442708195">
+  <name>SBG_28</name>
+</wpt>
+<wpt lat="44.276112306763316" lon="-83.349336693825137">
+  <name>SBG_29</name>
+</wpt>
+</gpx>

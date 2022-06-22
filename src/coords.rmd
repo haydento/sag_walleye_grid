@@ -23,60 +23,31 @@ h4.date {
 
 <br><br>
 
-# Receiver map (depth soundings in meters)
+# Receiver map ("nav chart" soundings in meters)
 
 ```{r, echo = FALSE, out.width = '100%'}
-
-tar_load(reefs)
-tar_load(grid)
-tar_load(dirty_lines)
-tar_load(grid_10km_dup_reefs)
+tar_load(leaflet_pts)
 tar_load(sbay)
-tar_load(raw_adj_grid)
 
-adj_grid <- fread(raw_adj_grid)
-#no_chnge <- adj_grid[is.na(`revised lat`), c("site", "depth (m)")]
-#yes_chnge <- adj_grid[!is.na(`revised lat`),]
-dirty_lines <- left_join(dirty_lines, adj_grid, by = "site")
-
-grid_10km_dup_reefs$SITE <- sub("-", "_", x = grid_10km_dup_reefs$SITE)
-grid_10km_dup_reefs <- left_join(grid_10km_dup_reefs, adj_grid, by = c("SITE" = "site"))
-
-coords <- st_coordinates(grid_10km_dup_reefs)
-foo <- as.data.table(grid_10km_dup_reefs)
-foo <- cbind(foo, coords)
-foo[is.na(`revised lat`), `revised lat` := Y]
-foo[is.na(`revised lon`), `revised lon` := X]
-foo[is.na(`new depth (m)`), `new depth (m)` := `depth (m)`]
-
-out <- foo[, c("GLATOS_ARRAY", "STATION_NO", "SITE", "revised lat", "revised lon", "new depth (m)")]
-out <- st_as_sf(out, coords = c("revised lon", "revised lat"), agr = "constant", crs = 4326)
-
-
-reefs$site <- sub("-", "_", x = reefs$site)
-reefs <- left_join(reefs, adj_grid, by = "site")
-coords <- st_coordinates(reefs)
-foo <- as.data.table(reefs)
-foo <- cbind(foo, coords)
-foo[is.na(`revised lat`), `revised lat` := Y]
-foo[is.na(`revised lon`), `revised lon` := X]
-foo[is.na(`new depth (m)`), `new depth (m)` := `depth (m)`]
-
-foo <- foo[, c("glatos_array", "station_no", "site", "revised lat", "revised lon", "new depth (m)")]
-foo <- st_as_sf(foo, coords = c("revised lon", "revised lat"), agr = "constant", crs = 4326)
-
-
-  # create leaflet map
+# create leaflet map
 m <- leaflet(height = 1000, width = 1000)
 m <- setView(m, zoom = 10, lat = 43.92460, lng = -83.48373)
 m <- addWMSTiles(m, "https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/ENCOnline/MapServer/exts/MaritimeChartService/WMSServer", layers = c(1,2,3,4,5,6,7), options = WMSTileOptions(format = "image/png", tranparent = TRUE))
 m <- addProviderTiles(m, providers$Esri.WorldImagery, group = "satellite")
 m <- addProviderTiles(m, providers$Esri.NatGeoWorldMap, group = "alt")
 m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "sag bay")
-m <- addCircleMarkers(m, data = grid, label = grid$station, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)  
-m <- addCircleMarkers(m, data = foo, label = ~site, color = c("blue"), radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1)
-m <- addCircleMarkers(m, data = dirty_lines, color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1)
-m <- addCircleMarkers(m, data = out, color = "yellow", radius = 6, group = "grid_10km", label = ~SITE, stroke = FALSE, fillOpacity = 1)
+
+# plot LWF recs
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 2,], label = ~site, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)  
+
+# plot bay reef receivers
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 1,], label = ~site, color = c("blue"), radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1)
+
+# plot receiver lines outside of SB
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 3,], color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1)
+
+# plot receiver grid in bay
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 4,], color = "yellow", radius = 6, group = "grid_10km", label = ~site, stroke = FALSE, fillOpacity = 1)
 m <- leafem::addMouseCoordinates(m)
 m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
 m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
@@ -89,51 +60,12 @@ m
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 
+coords <- as.data.table(st_coordinates(leaflet_pts))
+out <- data.table(site = leaflet_pts$site, glatos_array = leaflet_pts$glatos_array, station_no = leaflet_pts$station_no, depth_ft = round(leaflet_pts$chart_depth_ft, 1), lon = coords$X, lat = coords$Y, deployment = leaflet_pts$dep_type)
+out <- out[!.("YTZ"), on = "glatos_array"]
+out[, ID := 1:nrow(out)]
 
-
-coords <- as.data.table(st_coordinates(foo))
-foo <- as.data.table(st_drop_geometry(st_as_sf(foo)))
-foo <- cbind(foo, coords)
-setnames(foo, c("X", "Y", "new depth (m)"), c("longitude", "latitude", "depth_m"))
-foo <- foo[, c("site", "glatos_array", "station_no", "longitude", "latitude", "depth_m")]
-
-## tar_load(bay_mth_grd)
-## coords <- as.data.table(st_coordinates(bay_mth_grd))
-## coords[, `:=` (glatos_array = rep("SBG", n = nrow(coords)), station_no = 1:nrow(coords))]
-## coords[, `:=` (ID = paste(glatos_array, station_no, sep = "-"))]
-## setnames(coords, c("X", "Y"), c("longitude", "latitude"))
-## bay_grd <- coords
-
-## tar_load(dirty_sturgeon)
-## ds <- dirty_sturgeon[dirty_sturgeon$id == "rec_pt",]
-## coords <- as.data.table(st_coordinates(ds))
-## ds <- as.data.table(st_drop_geometry(st_as_sf(ds)))
-## ds[, `:=` (glatos_array = c("TRL", "CRL", "FRS", "FRL", "FRL", "SRL", "SRL", "SRS", "SRS", "SRS", "SRS"), station_no = c(1,1,1,1,2,1,2,1,2,3,4))]
-## ds <- ds[, `:=` (ID = paste(glatos_array, station_no, sep = "-"))]
-## ds <- cbind(ds, coords)
-## setnames(ds, c("X", "Y"), c("longitude", "latitude"))
-## ds <- ds[, c("ID", "glatos_array", "station_no", "longitude", "latitude")]
-
-#tar_load(dirty_lines)
-coords <- as.data.table(st_coordinates(dirty_lines))
-dl <- as.data.table(st_drop_geometry(st_as_sf(dirty_lines)))
-dl <- dl[, c("GLATOS_ARRAY", "STATION_NO", "site", "depth (m)"),]
-dl <- cbind(dl, coords)
-setnames(dl, c("X", "Y", "GLATOS_ARRAY", "STATION_NO", "depth (m)"), c("longitude", "latitude", "glatos_array", "station_no", "depth_m"))
-#dl <- dl[, `:=` (ID = paste(glatos_array, station_no, sep = "-"))]
-
-
-crds <- as.data.table(st_coordinates(out))
-dta <- as.data.table(st_drop_geometry(st_as_sf(out)))
-dta <- dta[, c("GLATOS_ARRAY", "STATION_NO", "SITE", "new depth (m)"),]
-dta <- cbind(dta, crds)
-setnames(dta, c("X", "Y", "GLATOS_ARRAY", "STATION_NO", "SITE", "new depth (m)"), c("longitude", "latitude", "glatos_array", "station_no", "site", "depth_m"))
-
-tot <- rbind(foo, dl, dta)
-tot[, ID := 1:nrow(tot)]
-coords_table(out_tbl = tot)
-
-fwrite(tot, "output/receivers.csv")
+coords_table(out_tbl = out)
 
 # see links below for info about customizing output.
 # https://babichmorrowc.github.io/post/changing-fonts-in-rmarkdown-pdfs/

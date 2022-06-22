@@ -352,8 +352,24 @@ tar_target(
   raw_adj_grid,
   "data/grid_adj_20220621.csv",
   format = "file"
-)
+),
 
+# visualize and clean up pts for rec deployments (latest version)
+tar_target(
+  leaflet_pts,
+  clean_leaflet(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lines, sag_grid = grid_10km_dup_reefs, adjustments = raw_adj_grid),
+  format = "rds"
+),
+
+# create gpx of only points in bay
+tar_target(
+  gpx_file,
+  {foo <- leaflet_pts[leaflet_pts$glatos_array != "YTZ", c("site")]
+    colnames(foo)[1] <- "name"
+    st_write(foo, "output/Sbay_walleye_recs.gpx", driver = "GPX")
+    return("output/Sbay_walleye_recs.gpx")},
+    format = "file"
+)
 
 )
 

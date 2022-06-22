@@ -1386,3 +1386,72 @@ coords_table <- function(out_tbl){#, path = "output/juv_coords.html"){
   return(flex)
 }
 
+#' @title clean-up and compile data for leaflet plot
+#' @description pulls together multiple data sources, compiles all receiver deployment locations into a single object for plotting, and adjusts locations of receivers using values in csv spreadsheet
+#' @param reefs reef point input (sf)
+#' @param LH_grid grid point input (sf)
+#' @param dirty_lines dirty lines point input (sf)
+#' @param sag_grid saginaw bay grid input (sf)
+#' @param sbay_outline saginaw bay outline (sf)
+#' @param adjustments visual point adjustments and depth data (path to .csv)
+
+#' tar_load(raw_adj_grid)
+#' adjustments = raw_adj_grid
+#' tar_load(reefs)
+#' tar_load(grid)
+#' LH_grid = grid
+#' tar_load(dirty_lines)
+#' tar_load(grid_10km_dup_reefs)
+#' sag_grid = grid_10km_dup_reefs
+
+clean_leaflet <- function(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lines, sag_grid = grid_10km_dup_reefs, adjustments){
+  adj_grid <- fread(adjustments)
+  setDT(reefs)
+  reefs[, site := sub("-", "_", x = site)]
+  setDT(LH_grid)
+  setnames(LH_grid, ("station"), c("site"))
+  LH_grid[, site := sub("-", "_", x = site)]
+  LH_grid[, glatos_array := tstrsplit(site, "_", fixed = TRUE, keep = 1)]
+  LH_grid[, station_no := tstrsplit(site, "_", fixed = TRUE, keep = 2)]
+  LH_grid[, station_no := as.numeric(station_no)]
+  setDT(dirty_lines)
+  setnames(dirty_lines, c("STATION_NO", "GLATOS_ARRAY"), c("station_no", "glatos_array"))
+  setDT(sag_grid)
+  setnames(sag_grid, c("STATION_NO", "GLATOS_ARRAY", "SITE"), c("station_no", "glatos_array", "site"))
+  sag_grid[, site := sub("-", "_", x = site)]
+
+  # combine all data into a single object
+  pts <- rbind(reefs, LH_grid, dirty_lines, sag_grid, use.names = TRUE, fill = TRUE, idcol = "source")
+
+  # extract all depths at receivers
+  # depths were estimated visually from navigation chart
+  setnames(adj_grid, "new depth (m)", "chart_depth_m")
+  adj_grid[, chart_depth_ft := 3.28084 * chart_depth_m]
+
+  # add depths to receiver location points
+  pts <- adj_grid[pts, on = "site"]
+
+  # extract original coordinates and append back to pts as new columns
+  pts <- st_as_sf(pts)
+  pts <- cbind(pts, as.data.table(st_coordinates(pts)))
+
+  # change original coordinates to revised ones only where revised ones exist
+  setDT(pts)
+  pts[!is.na(revised.lat), Y := revised.lat]
+  pts[!is.na(revised.lon), X := revised.lon]
+  new_pts <- pts[, c("X", "Y")]
+  new_pts <- st_geometry(st_as_sf(new_pts, coords = c("X", "Y"), agr = "constant", crs = 4326))
+
+  # original geometry is active...
+  # geometry column is original coordinates, geom_revised is revised visually based on .csv
+  pts <- st_as_sf(pts)
+  pts$geom_revised = new_pts
+
+  # set active geometry to revised coordinates
+  pts <- st_set_geometry(pts, "geom_revised")
+
+  # add column of deployment type
+  pts$dep_type <- ifelse(pts$chart_depth_ft <= 15, "tube", ifelse(pts$chart_depth_ft > 15 &pts$chart_depth_ft < 100, "8ft bridle", "20ft bridle")) 
+
+  return(pts)
+}
