@@ -67,6 +67,8 @@ out[, ID := 1:nrow(out)]
 
 coords_table(out_tbl = out)
 
+fwrite(out, "output/WA_sag_bay_recs_2022.csv")
+
 # see links below for info about customizing output.
 # https://babichmorrowc.github.io/post/changing-fonts-in-rmarkdown-pdfs/
 # used flextable to style table
