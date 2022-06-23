@@ -41,16 +41,16 @@ m <- addPolygons(map = m, data = sbay, color  = "red", fillColor = NA, group = "
 m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 2,], label = ~site, color = c("red"), radius = c(4), group = "LWF recs", stroke = FALSE, fillOpacity = 1)  
 
 # plot bay reef receivers
-m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 1,], label = ~site, color = c("blue"), radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1)
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 1,], label = ~site, color = c("blue"), radius = c(6),  group = "bay reefs", stroke = FALSE, fillOpacity = 1, labelOptions = labelOptions(noHide = TRUE))
 
 # plot receiver lines outside of SB
-m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 3,], color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1)
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 3,], color = "purple", radius = 6, group = "proposed_walleye", label = ~site, stroke = FALSE, fillOpacity = 1, labelOptions = labelOptions(noHide = TRUE))
 
 # plot receiver grid in bay
-m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 4,], color = "yellow", radius = 6, group = "grid_10km", label = ~site, stroke = FALSE, fillOpacity = 1)
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 4,], color = "yellow", radius = 6, group = "grid_10km", label = ~site, stroke = FALSE, fillOpacity = 1,labelOptions = labelOptions(noHide = TRUE))
 m <- leafem::addMouseCoordinates(m)
 m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
-m <- addLayersControl(m, baseGroups = c("satellite", "nav chart", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+m <- addLayersControl(m, baseGroups = c("nav chart", "satellite", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
 m
 
 ```
@@ -65,7 +65,15 @@ out <- data.table(site = leaflet_pts$site, glatos_array = leaflet_pts$glatos_arr
 out <- out[!.("YTZ"), on = "glatos_array"]
 out[, ID := 1:nrow(out)]
 
-coords_table(out_tbl = out)
+#coords_table(out_tbl = out)
+#set(out, j = "lon", value = round(out$lon, 5))
+#set(out, j = "lat", value = round(out$lat, 5))
+
+#remove coordinates for public display
+out.1 <- out[, !(c("lon", "lat"))]
+
+
+DT::datatable(out.1, class = 'cell-border stripe', options = list(dom = "ft", pageLength = nrow(out.1)))
 
 fwrite(out, "output/WA_sag_bay_recs_2022.csv")
 

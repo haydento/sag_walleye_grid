@@ -5,7 +5,7 @@ source("src/glider_funcs.R")
 source("src/util_funcs.R")
 options(tidyverse.quiet = TRUE)
 
-tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl", "leafgl", "spatstat.core", "tidyverse"))
+tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl", "leafgl", "spatstat.core", "tidyverse", "DT"))
 
 list(
   # load path to range curve data collected by Binder in 2016 in GB with V13 tags
@@ -211,6 +211,7 @@ tar_target(
   format = "rds"
 ),
 
+# contains summary of map and receiver deployments locations for most recent design (2022-06-23)
 tar_render(
   dtc_summary,
   "src/coords.rmd",
@@ -354,14 +355,14 @@ tar_target(
   format = "file"
 ),
 
-# visualize and clean up pts for rec deployments (latest version)
+# visualize and clean up pts for rec deployments (latest version of grid 2022-06-23)
 tar_target(
   leaflet_pts,
   clean_leaflet(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lines, sag_grid = grid_10km_dup_reefs, adjustments = raw_adj_grid),
   format = "rds"
 ),
 
-# create gpx of only points in bay
+# create gpx of only points in bay that HBBS is responsible for tending
 tar_target(
   gpx_file,
   {foo <- leaflet_pts[leaflet_pts$glatos_array != "YTZ", c("site")]
