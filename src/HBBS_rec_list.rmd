@@ -1,0 +1,44 @@
+---
+title: "Receiver deployment location- Saginaw Bay Walleye (HBBS)"
+date: "as of `r format(Sys.time(), '%m/%d/%Y %H:%M')` "
+output:
+  html_document
+---
+
+<style type="text/css">
+
+h1.title {
+	font-size: 34px;
+	text-align: center;
+	}
+	
+h4.date {
+   font-size: 18px;
+   text-align: center;
+   }
+
+}
+   	
+</style>
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+tar_load(leaflet_pts)
+
+foo <- extract_coordinates(leaflet_pts, latlon = TRUE, offshore = TRUE)
+foo[deployment == "tube", rec_type := "VR2W or VR2Tx"]
+foo[deployment == "1ft lower bridle, 3ft upper bridle", rec_type := "VR2AR"]
+foo[deployment == "8ft lower bridle, 5ft upper bridle", rec_type := "VR2AR"]
+
+foo %>%
+  kbl() %>%
+  kableExtra::kable_styling() %>%
+  row_spec(row = foo[foo$deployment == "tube", which = TRUE], color = "red") %>%
+  row_spec(row = foo[foo$deployment == "1ft lower bridle, 3ft upper bridle", which = TRUE], color = "blue")
+  
+
+# see links below for info about customizing output.
+# https://babichmorrowc.github.io/post/changing-fonts-in-rmarkdown-pdfs/
+# used flextable to style table
+
+```
+
