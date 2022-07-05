@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <gpx version="1.1" creator="GDAL 3.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
-<metadata><bounds minlat="43.677680000000002" minlon="-83.850520569147122" maxlat="44.451949999999997" maxlon="-82.568730000000002"/></metadata>                
+<metadata><bounds minlat="43.587347000000001" minlon="-83.923177999999993" maxlat="44.451949999999997" maxlon="-82.568730000000002"/></metadata>                
 <wpt lat="43.73802" lon="-83.68583">
   <name>COR_1</name>
 </wpt>
@@ -132,5 +132,72 @@
 </wpt>
 <wpt lat="44.276112306763316" lon="-83.349336693825137">
   <name>SBG_29</name>
+</wpt>
+<wpt lat="43.658609" lon="-83.883048">
+  <name>KAW_1</name>
+</wpt>
+<wpt lat="43.997371" lon="-83.824418">
+  <name>RIF_1</name>
+</wpt>
+<wpt lat="44.029298" lon="-83.683161">
+  <name>AUG_1</name>
+</wpt>
+<wpt lat="44.258951" lon="-83.526614">
+  <name>TAW_1</name>
+</wpt>
+<wpt lat="43.977171" lon="-83.856699">
+  <name>PIN_1</name>
+</wpt>
+<wpt lat="43.919144" lon="-83.897774">
+  <name>SGN_1</name>
+</wpt>
+<wpt lat="43.84661" lon="-83.923178">
+  <name>PNC_1</name>
+</wpt>
+<wpt lat="43.587347" lon="-83.67951">
+  <name>QUA_1</name>
+</wpt>
+<wpt lat="43.94318" lon="-83.275839">
+  <name>PIG_1</name>
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
+</wpt>
+<wpt lat="nan" lon="nan">
 </wpt>
 </gpx>

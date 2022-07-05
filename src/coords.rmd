@@ -28,6 +28,7 @@ h4.date {
 ```{r, echo = FALSE, out.width = '100%'}
 tar_load(leaflet_pts)
 tar_load(sbay)
+tar_load(dirty_sturgeon_pts)
 
 # create leaflet map
 m <- leaflet(height = 1000, width = 1000)
@@ -48,9 +49,16 @@ m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 3,], color = "
 
 # plot receiver grid in bay
 m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 4,], color = "yellow", radius = 6, group = "grid_10km", label = ~site, stroke = FALSE, fillOpacity = 1,labelOptions = labelOptions(noHide = TRUE))
+
+# plot proposed receivers in Sag tribs (sturgeon)
+m <- addCircleMarkers(m, data = dirty_sturgeon_pts, color = "green", radius = 6, group = "sturgeon", label = ~Name, stroke = FALSE, fillOpacity = 1, labelOptions = labelOptions(noHide = TRUE))
+
+# plot proposed receivers in walleye spawning tribs
+m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 5,], color = "orange", label = ~site, stroke = FALSE, fillOpacity = 1, labelOptions = labelOptions(noHide = TRUE), group = "walleye tribs")
+
 m <- leafem::addMouseCoordinates(m)
 m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
-m <- addLayersControl(m, baseGroups = c("nav chart", "satellite", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+m <- addLayersControl(m, baseGroups = c("nav chart", "satellite", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay", "sturgeon", "walleye tribs"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
 m
 
 ```
@@ -60,22 +68,22 @@ m
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 
-coords <- as.data.table(st_coordinates(leaflet_pts))
-out <- data.table(site = leaflet_pts$site, glatos_array = leaflet_pts$glatos_array, station_no = leaflet_pts$station_no, depth_ft = round(leaflet_pts$chart_depth_ft, 1), lon = coords$X, lat = coords$Y, deployment = leaflet_pts$dep_type)
-out <- out[!.("YTZ"), on = "glatos_array"]
-out[, ID := 1:nrow(out)]
+foo <- extract_coordinates(leaflet_pts, latlon = FALSE, offshore = FALSE)
 
-#coords_table(out_tbl = out)
-#set(out, j = "lon", value = round(out$lon, 5))
-#set(out, j = "lat", value = round(out$lat, 5))
+# LWF- LH grid
+foo[glatos_array == "YTZ", maintenance := "USGS-Chris Holbrook"]
 
-#remove coordinates for public display
-out.1 <- out[, !(c("lon", "lat"))]
+# sturgeon receivers
+foo[site %in% c("TRA_1", "TRR_1", "TRL_1", "CRA_1", "CRR_1", "CRL_1", "FRR_1", "FRL_1", "FRL_2", "FRL_3", "SHA_1", "SHR_1", "SHL_1", "SHL_2", "SHL_3", "SAG_1", "SAG_2", "SAG_3", "SAG_4", "SAG_5"), maintenance := "USFWS-Sturgeon"]
 
+# trib receivers
+foo[site %in% c("TAW_1", "AUG_1", "RIF_1", "SGN_1", "PNC_1", "KAW_1", "QUA_1", "PIG_1", "PIN_1"), maintenance := "MDNR-Bay City"]
 
-DT::datatable(out.1, class = 'cell-border stripe', options = list(dom = "ft", pageLength = nrow(out.1)))
+# USGS-HBBS/MDNR-Alpena
+foo[glatos_array %in% c("SBG", "LCR", "TWR", "DCK", "COR", "NIR", "OSC", "HBC"), maintenance := "HBBS/MDNR-Alpena"]
 
-fwrite(out, "output/WA_sag_bay_recs_2022.csv")
+DT::datatable(foo[, c("site", "depth_ft", "deployment", "ID", "maintenance")], class = 'cell-border stripe')
+
 
 # see links below for info about customizing output.
 # https://babichmorrowc.github.io/post/changing-fonts-in-rmarkdown-pdfs/

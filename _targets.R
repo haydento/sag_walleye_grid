@@ -5,7 +5,7 @@ source("src/glider_funcs.R")
 source("src/util_funcs.R")
 options(tidyverse.quiet = TRUE)
 
-tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl", "leafgl", "spatstat.core", "tidyverse", "DT"))
+tar_option_set(packages = c("data.table", "sf", "glatos", "geosphere", "viridisLite",  "ggplot2", "raster", "flextable", "terra", "geosphere", "leaflet", "readxl", "leafgl", "spatstat.core", "tidyverse", "DT", "kableExtra"))
 
 list(
   # load path to range curve data collected by Binder in 2016 in GB with V13 tags
@@ -131,7 +131,8 @@ tar_target(
   format = "rds"
   ),
 
- 
+
+# contains possible tributary deployments
 tar_target(
   rec_lines,
   "data/LH_tribs_lines.csv",
@@ -166,9 +167,7 @@ tar_target(
 
 tar_target(
   spawn_rivs,
-  {out <- fread(raw_spawn_riv);
-    st_as_sf(out, agr = "constant", remove = FALSE, coords = c("long", "lat"), crs = 4326)
-  },
+  .spawn_rivs(raw = raw_spawn_riv),
   format = "rds"
 ),
 
@@ -358,7 +357,7 @@ tar_target(
 # visualize and clean up pts for rec deployments (latest version of grid 2022-06-23)
 tar_target(
   leaflet_pts,
-  clean_leaflet(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lines, sag_grid = grid_10km_dup_reefs, adjustments = raw_adj_grid),
+  clean_leaflet(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lines, sag_grid = grid_10km_dup_reefs, adjustments = raw_adj_grid, sturgeon = dirty_sturgeon_pts, rivs = spawn_rivs),
   format = "rds"
 ),
 
@@ -370,15 +369,45 @@ tar_target(
     st_write(foo, "output/Sbay_walleye_recs.gpx", driver = "GPX")
     return("output/Sbay_walleye_recs.gpx")},
     format = "file"
+),
+
+tar_target(
+  raw_sturgeon,
+  "data/Proposed Sturgeon Receivers in Tribs v1 (1).kmz",
+  format = "file"
+),
+
+tar_target(
+  dirty_sturgeon_pts,
+  {foo <- sf::st_read(raw_sturgeon)
+    foo <- st_zm(foo)
+    setDT(foo)
+    # add site names
+    foo[, site := c("TRA_1", "TRR_1", "TRL_1", "CRA_1", "CRR_1", "CRL_1", "FRR_1", "FRL_1", "FRL_2", "FRL_3", "SHA_1", "SHR_1", "SHL_1", "SHL_2", "SHL_3", "SAG_1", "SAG_2", "SAG_3", "SAG_4", "SAG_5")]
+
+    foo <- st_as_sf(foo)
+  },
+  format = "rds"
+),
+
+# add in receiver maintenance data for all Sag Bay
+tar_target(
+  raw_maintenance,
+  "data/WA_rec_maintenance_20220701.csv",
+  format = "file"
+),
+
+tar_render(
+  HBBS_rec_prep,
+  "src/HBBS_rec_list.rmd",
+  output_dir = "output",
+  output_file = "HBBS_rec_deps_WA.html"
 )
+
+
 
 )
 
-## tar_target(
-##   inner_bay_rec_grid_rand,
-##   random_pts(in_poly = in_bay, exist_pts = reefs, dist = 12000, cores = 4),
-##   format = "rds"
-## )
 
     
  

@@ -1,3 +1,20 @@
+# clean up walleye spawning rivers
+
+#' tar_load(raw_spawn_riv)
+#' raw = raw_spawn_riv
+
+.spawn_rivs <- function(raw = raw_spawn_riv){
+  out <- fread(raw)
+  out <- out[river %in% c("Kawkawlin", "Rifle", "Au Gres", "Tawas", "Pine", "Saganing", "Pinconning", "Quanicassee", "Pigeon"),];
+  out[, site := c("KAW_1", "RIF_1", "AUG_1", "TAW_1", "PIN_1", "SGN_1", "PNC_1", "QUA_1", "PIG_1")];
+  out[, station_no := 1];
+  out[, glatos_array := tstrsplit(site, "_", fixed = TRUE, keep = 1)];
+  setnames(out, c("lat", "long"), c("latitude", "longitude"));
+  out <- st_as_sf(out, agr = "constant", remove = FALSE, coords = c("longitude", "latitude"), crs = 4326)
+  return(out)
+}
+
+
 #' @title simple clean up reef information, prepare for plotting
 #' @description remove degrees symbol in lat/long, simplify column names, convert to sf object
 #' @param x table of reefs information
@@ -1403,8 +1420,12 @@ coords_table <- function(out_tbl){#, path = "output/juv_coords.html"){
 #' tar_load(dirty_lines)
 #' tar_load(grid_10km_dup_reefs)
 #' sag_grid = grid_10km_dup_reefs
+#' tar_load(spawn_rivs)
+#' rivs = spawn_rivs
+#' tar_load(dirty_sturgeon_pts)
+#' sturgeon = dirty_sturgeon_pts
 
-clean_leaflet <- function(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lines, sag_grid = grid_10km_dup_reefs, adjustments){
+clean_leaflet <- function(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lines, sag_grid = grid_10km_dup_reefs, adjustments, sturgeon = dirty_sturgeon_pts, rivs = spawn_rivs){
   adj_grid <- fread(adjustments)
   setDT(reefs)
   reefs[, site := sub("-", "_", x = site)]
@@ -1419,9 +1440,9 @@ clean_leaflet <- function(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lin
   setDT(sag_grid)
   setnames(sag_grid, c("STATION_NO", "GLATOS_ARRAY", "SITE"), c("station_no", "glatos_array", "site"))
   sag_grid[, site := sub("-", "_", x = site)]
-
+  
   # combine all data into a single object
-  pts <- rbind(reefs, LH_grid, dirty_lines, sag_grid, use.names = TRUE, fill = TRUE, idcol = "source")
+  pts <- rbind(reefs, LH_grid, dirty_lines, sag_grid, rivs, sturgeon, use.names = TRUE, fill = TRUE, idcol = "source")
 
   # extract all depths at receivers
   # depths were estimated visually from navigation chart
@@ -1451,7 +1472,44 @@ clean_leaflet <- function(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lin
   pts <- st_set_geometry(pts, "geom_revised")
 
   # add column of deployment type
-  pts$dep_type <- ifelse(pts$chart_depth_ft <= 15, "tube", ifelse(pts$chart_depth_ft > 15 &pts$chart_depth_ft < 100, "8ft bridle", "20ft bridle")) 
+  pts$dep_type <- ifelse(pts$chart_depth_ft <= 15, "tube", ifelse(pts$chart_depth_ft > 15 & pts$chart_depth_ft <= 30, "1ft lower bridle, 3ft upper bridle", "8ft lower bridle, 5ft upper bridle"))
 
   return(pts)
 }
+
+
+
+# extract coordinates
+
+#' tar_load(leaflet_pts)
+#' x <- leaflet_pts
+
+extract_coordinates <- function(x, latlon = TRUE, offshore = TRUE){
+  coords <- as.data.table(st_coordinates(x))
+  out <- data.table(site = x$site, glatos_array = x$glatos_array, station_no = x$station_no, depth_ft = round(x$chart_depth_ft, 1), lon = coords$X, lat = coords$Y, deployment = x$dep_type)
+
+  if(offshore == TRUE) {
+    out <- out[!glatos_array %in% c("YTZ", "KAW", "RIF", "AUG", "TAW", "PIN", "SGN", "PNC", "QUA", "PIG"), on = "glatos_array"]
+    out <- out[!is.na(glatos_array),]
+    
+    }
+  
+  
+  out[, ID := 1:nrow(out)]
+  
+  #coords_table(out_tbl = out)
+  #set(out, j = "lon", value = round(out$lon, 5))
+  #set(out, j = "lat", value = round(out$lat, 5))
+
+  if(latlon == FALSE){
+    #remove coordinates for public display
+    out <- out[, !(c("lon", "lat"))]
+  }
+  
+  
+  return(out)
+}
+
+ # fwrite(out, "output/WA_sag_bay_recs_2022.csv")
+
+
