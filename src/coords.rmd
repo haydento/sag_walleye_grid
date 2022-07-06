@@ -76,13 +76,18 @@ foo[glatos_array == "YTZ", maintenance := "USGS-Chris Holbrook"]
 # sturgeon receivers
 foo[site %in% c("TRA_1", "TRR_1", "TRL_1", "CRA_1", "CRR_1", "CRL_1", "FRR_1", "FRL_1", "FRL_2", "FRL_3", "SHA_1", "SHR_1", "SHL_1", "SHL_2", "SHL_3", "SAG_1", "SAG_2", "SAG_3", "SAG_4", "SAG_5"), maintenance := "USFWS-Sturgeon"]
 
+foo[maintenance == "USFWS-Sturgeon", desc := "Saginaw, Tittabawassee, Cass, Flint, Shiawassee rivers"]
+
+
 # trib receivers
 foo[site %in% c("TAW_1", "AUG_1", "RIF_1", "SGN_1", "PNC_1", "KAW_1", "QUA_1", "PIG_1", "PIN_1"), maintenance := "MDNR-Bay City"]
+foo[maintenance == "MDNR-Bay City", desc := "Saginaw Bay tributaries- walleye"]
 
 # USGS-HBBS/MDNR-Alpena
 foo[glatos_array %in% c("SBG", "LCR", "TWR", "DCK", "COR", "NIR", "OSC", "HBC"), maintenance := "HBBS/MDNR-Alpena"]
+foo[maintenance == "HBBS/MDNR-Alpena", desc := "Saginaw Bay offshore receivers"]
 
-DT::datatable(foo[, c("site", "depth_ft", "deployment", "ID", "maintenance")], class = 'cell-border stripe')
+DT::datatable(foo[, c("site", "depth_ft", "deployment", "ID", "maintenance", "desc")], class = 'cell-border stripe')
 
 
 # see links below for info about customizing output.

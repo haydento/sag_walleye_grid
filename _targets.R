@@ -364,12 +364,30 @@ tar_target(
 # create gpx of only points in bay that HBBS is responsible for tending
 tar_target(
   gpx_file,
-  {foo <- leaflet_pts[leaflet_pts$glatos_array != "YTZ", c("site")]
-    colnames(foo)[1] <- "name"
-    st_write(foo, "output/Sbay_walleye_recs.gpx", driver = "GPX")
+  {
+    foo <- leaflet_pts %>% filter(glatos_array != "YTZ" & !is.na(glatos_array) & !(glatos_array %in% c("KAW", "RIF", "AUG", "TAW", "PIN", "SGN", "PNC", "QUA", "PIG"))) %>% select(site) %>% rename(name = site)
+    st_write(foo, "output/Sbay_walleye_recs.gpx", driver = "GPX", append = FALSE)
     return("output/Sbay_walleye_recs.gpx")},
     format = "file"
 ),
+
+# create gpx of all points in bay (no LWF receivers, but include all sag tribs)
+tar_target(
+  gpx_file_all,
+  {foo <- leaflet_pts %>% filter(glatos_array != "YTZ" | is.na(glatos_array)) %>% select(site) %>% rename(name = site)
+    st_write(foo, "output/Sbay_walleye_recs_all.gpx", driver = "GPX", append = FALSE)
+    return("output/Sbay_walleye_recs_all.gpx")},
+  format = "file"
+),
+
+# create kml of all points in bay (no LWF receivers, but all sag tribs)
+tar_target(
+  kml_all,
+  {foo <- leaflet_pts %>% filter(glatos_array != "YTZ" | is.na(glatos_array)) %>% select(site) %>% rename(name = site)
+    st_write(foo, "output/Sbay_walleye_recs_all.kml", driver = "kml", append = FALSE)
+    return("output/Sbay_walleye_recs_all.kml")},
+  format = "file"
+  ),
 
 tar_target(
   raw_sturgeon,

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <gpx version="1.1" creator="GDAL 3.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
-<metadata><bounds minlat="43.677680000000002" minlon="-83.850520569147122" maxlat="44.451949999999997" maxlon="-82.568730000000002"/></metadata>                
+<metadata><bounds minlat="43.016774756668319" minlon="-84.246680999999995" maxlat="44.451949999999997" maxlon="-82.568730000000002"/></metadata>                
 <wpt lat="43.73802" lon="-83.68583">
   <name>COR_1</name>
 </wpt>
@@ -132,5 +132,92 @@
 </wpt>
 <wpt lat="44.276112306763316" lon="-83.349336693825137">
   <name>SBG_29</name>
+</wpt>
+<wpt lat="43.658609" lon="-83.883048">
+  <name>KAW_1</name>
+</wpt>
+<wpt lat="43.997371" lon="-83.824418">
+  <name>RIF_1</name>
+</wpt>
+<wpt lat="44.029298" lon="-83.683161">
+  <name>AUG_1</name>
+</wpt>
+<wpt lat="44.258951" lon="-83.526614">
+  <name>TAW_1</name>
+</wpt>
+<wpt lat="43.977171" lon="-83.856699">
+  <name>PIN_1</name>
+</wpt>
+<wpt lat="43.919144" lon="-83.897774">
+  <name>SGN_1</name>
+</wpt>
+<wpt lat="43.84661" lon="-83.923178">
+  <name>PNC_1</name>
+</wpt>
+<wpt lat="43.587347" lon="-83.67951">
+  <name>QUA_1</name>
+</wpt>
+<wpt lat="43.94318" lon="-83.275839">
+  <name>PIG_1</name>
+</wpt>
+<wpt lat="43.61075" lon="-84.246681">
+  <name>TRA_1</name>
+</wpt>
+<wpt lat="43.569785582135047" lon="-84.195555616679044">
+  <name>TRR_1</name>
+</wpt>
+<wpt lat="43.385744917100283" lon="-83.983758925554724">
+  <name>TRL_1</name>
+</wpt>
+<wpt lat="43.327893173121502" lon="-83.722918453869141">
+  <name>CRA_1</name>
+</wpt>
+<wpt lat="43.325670671289387" lon="-83.742371785999879">
+  <name>CRR_1</name>
+</wpt>
+<wpt lat="43.375876430179368" lon="-83.979851593493464">
+  <name>CRL_1</name>
+</wpt>
+<wpt lat="43.016774756668319" lon="-83.731536506849864">
+  <name>FRR_1</name>
+</wpt>
+<wpt lat="43.32032197027231" lon="-83.995918227313709">
+  <name>FRL_1</name>
+</wpt>
+<wpt lat="43.331084132760068" lon="-84.048027338528556">
+  <name>FRL_2</name>
+</wpt>
+<wpt lat="43.365049201930788" lon="-84.001505131279131">
+  <name>FRL_3</name>
+</wpt>
+<wpt lat="43.167687500674887" lon="-84.1169057770243">
+  <name>SHA_1</name>
+</wpt>
+<wpt lat="43.185178826918502" lon="-84.112616688480287">
+  <name>SHR_1</name>
+</wpt>
+<wpt lat="43.295356074280697" lon="-84.0904568680957">
+  <name>SHL_1</name>
+</wpt>
+<wpt lat="43.323088487901302" lon="-84.090664005292098">
+  <name>SHL_2</name>
+</wpt>
+<wpt lat="43.360046907013007" lon="-84.050552660475063">
+  <name>SHL_3</name>
+</wpt>
+<wpt lat="43.381468163964229" lon="-83.979208436815952">
+  <name>SAG_1</name>
+</wpt>
+<wpt lat="43.388376237479228" lon="-83.964921394579818">
+  <name>SAG_2</name>
+</wpt>
+<wpt lat="43.464300355026111" lon="-83.911027134187862">
+  <name>SAG_3</name>
+</wpt>
+<wpt lat="43.639175423839973" lon="-83.849566210551743">
+  <name>SAG_4</name>
+</wpt>
+<wpt lat="43.638243011962402" lon="-83.844832503922177">
+  <name>SAG_5</name>
 </wpt>
 </gpx>
