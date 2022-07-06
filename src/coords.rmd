@@ -87,8 +87,8 @@ foo[maintenance == "MDNR-Bay City", desc := "Saginaw Bay tributaries- walleye"]
 foo[glatos_array %in% c("SBG", "LCR", "TWR", "DCK", "COR", "NIR", "OSC", "HBC"), maintenance := "HBBS/MDNR-Alpena"]
 foo[maintenance == "HBBS/MDNR-Alpena", desc := "Saginaw Bay offshore receivers"]
 
-DT::datatable(foo[, c("site", "depth_ft", "deployment", "ID", "maintenance", "desc")], class = 'cell-border stripe', options = list(
-  columnDefs = list(list(className = 'dt-center', targets = c(0,1,2,3,4,5,6))),
+DT::datatable(foo[, c("site", "depth_ft", "deployment", "maintenance", "desc")], class = 'cell-border stripe', options = list(
+  columnDefs = list(list(className = 'dt-center', targets = c(0,1,2,3,4,5))),
                     pageLength = 25,
   lengthMenu = c(25,50,75,100)
 )
