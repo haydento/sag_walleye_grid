@@ -210,7 +210,7 @@ tar_target(
   format = "rds"
 ),
 
-# contains summary of map and receiver deployments locations for most recent design (2022-06-23)
+# contains summary of map and receiver deployments locations for most recent design (2022-07-06)
 tar_render(
   dtc_summary,
   "src/coords.rmd",
@@ -361,7 +361,7 @@ tar_target(
   format = "rds"
 ),
 
-# create gpx of only points in bay that HBBS is responsible for tending
+# create gpx of only points in bay that HBBS is responsible for tending (2022-07-06)
 tar_target(
   gpx_file,
   {
@@ -371,7 +371,7 @@ tar_target(
     format = "file"
 ),
 
-# create gpx of all points in bay (no LWF receivers, but include all sag tribs)
+# create gpx of all points in bay (no LWF receivers, but include all sag tribs)(2022-07-06)
 tar_target(
   gpx_file_all,
   {foo <- leaflet_pts %>% filter(glatos_array != "YTZ" | is.na(glatos_array)) %>% select(site) %>% rename(name = site)
@@ -380,7 +380,7 @@ tar_target(
   format = "file"
 ),
 
-# create kml of all points in bay (no LWF receivers, but all sag tribs)
+# create kml of all points in bay (no LWF receivers, but all sag tribs) (2022-07-06)
 tar_target(
   kml_all,
   {foo <- leaflet_pts %>% filter(glatos_array != "YTZ" | is.na(glatos_array)) %>% select(site) %>% rename(name = site)
@@ -415,6 +415,7 @@ tar_target(
   format = "file"
 ),
 
+# latest packing list for receiver deployments (2022-07-06)
 tar_render(
   HBBS_rec_prep,
   "src/HBBS_rec_list.rmd",
