@@ -421,8 +421,20 @@ tar_render(
   "src/HBBS_rec_list.rmd",
   output_dir = "output",
   output_file = "HBBS_rec_deps_WA.html"
-)
+),
 
+# add in MDNR and Purdue gear deployments in Saginaw Bay (2022-07-07)
+tar_target(
+  purdue_raw,
+  "data/Saginaw Bay instrument package locations.xlsx",
+  format = "file"
+),
+
+tar_target(
+  purdue,
+  .purdue(x = purdue_raw),
+  format = "rds"
+)
 
 
 )

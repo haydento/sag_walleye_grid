@@ -29,6 +29,7 @@ h4.date {
 tar_load(leaflet_pts)
 tar_load(sbay)
 tar_load(dirty_sturgeon_pts)
+tar_load(purdue)
 
 # create leaflet map
 m <- leaflet(height = 1000, width = 1000)
@@ -56,9 +57,15 @@ m <- addCircleMarkers(m, data = dirty_sturgeon_pts, color = "green", radius = 6,
 # plot proposed receivers in walleye spawning tribs
 m <- addCircleMarkers(m, data = leaflet_pts[leaflet_pts$source == 5,], color = "orange", label = ~site, stroke = FALSE, fillOpacity = 1, labelOptions = labelOptions(noHide = TRUE), group = "walleye tribs")
 
+# plot existing DNR/purdue SEASONAL loggers in Sag Bay
+m <- addMarkers(m, data = purdue$seasonal, label = ~label, popup = ~label, group = "seasonal DO loggers")
+
+# plot existing DNR/purdue YEAR-ROUND loggers in Sag Bay
+m <- addAwesomeMarkers(m, data = purdue$all_yr, label = ~label, popup = ~label, group = "all-year DO loggers", icon = awesomeIcons(icon = 'ion-ionic', library = 'ion', markerColor = 'red'))
+
 m <- leafem::addMouseCoordinates(m)
 m <- addMeasure(m, primaryLengthUnit = "meters", secondaryLengthUnit = "kilometers")  
-m <- addLayersControl(m, baseGroups = c("nav chart", "satellite", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay", "sturgeon", "walleye tribs"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
+m <- addLayersControl(m, baseGroups = c("nav chart", "satellite", "alt"), overlayGroups = c("LWF recs", "bay reefs", "proposed_walleye", "grid_10km", "sag bay", "sturgeon", "walleye tribs", "seasonal DO loggers", "all-year DO loggers"), position = "bottomright", options = layersControlOptions(collapsed = FALSE))
 m
 
 ```

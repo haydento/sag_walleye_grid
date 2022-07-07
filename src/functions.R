@@ -1513,3 +1513,28 @@ extract_coordinates <- function(x, latlon = TRUE, offshore = TRUE){
  # fwrite(out, "output/WA_sag_bay_recs_2022.csv")
 
 
+
+
+# read in and clean purdue data
+#' tar_load(purdue_raw)
+#' x <- purdue_raw
+
+
+.purdue <- function(x){
+  y <- read_excel(x, range = "DO Loggers!C6:J34")
+  setDT(y)
+  y[, label := paste("DO", `Site Name`, Deployment, Anchor, "ID", Count, sep = "_")]
+  seasonal <- y[Anchor != "Pyramid",]
+  all_yr <- y[Anchor == "Pyramid",]
+  seasonal <- st_as_sf(seasonal, coords = c("Longitude", "Latitude"), crs = 4326)
+  all_yr <- st_as_sf(all_yr, coords = c("Longitude", "Latitude"), crs = 4326)
+  out <- list(seasonal = seasonal, all_yr = all_yr)
+  return(out)
+}
+
+
+
+
+
+
+  
