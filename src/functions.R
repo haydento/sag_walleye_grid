@@ -5,8 +5,8 @@
 
 .spawn_rivs <- function(raw = raw_spawn_riv){
   out <- fread(raw)
-  out <- out[river %in% c("Kawkawlin", "Rifle", "Au Gres", "Tawas", "Pine", "Saganing", "Pinconning", "Quanicassee", "Pigeon"),];
-  out[, site := c("KAW_1", "RIF_1", "AUG_1", "TAW_1", "PIN_1", "SGN_1", "PNC_1", "QUA_1", "PIG_1")];
+  out <- out[river %in% c("Kawkawlin", "Rifle", "Au Gres", "Tawas", "Pine", "Saganing", "Pinconning", "Quanicassee", "Pigeon", "Sebewaing"),];
+  out[, site := c("KAW_1", "RIF_1", "AUG_1", "TAW_1", "PIN_1", "SGN_1", "PNC_1", "QUA_1", "PIG_1", "SEB_1")];
   out[, station_no := 1];
   out[, glatos_array := tstrsplit(site, "_", fixed = TRUE, keep = 1)];
   setnames(out, c("lat", "long"), c("latitude", "longitude"));

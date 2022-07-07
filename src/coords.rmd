@@ -80,7 +80,7 @@ foo[maintenance == "USFWS-Sturgeon", desc := "Saginaw, Tittabawassee, Cass, Flin
 
 
 # trib receivers
-foo[site %in% c("TAW_1", "AUG_1", "RIF_1", "SGN_1", "PNC_1", "KAW_1", "QUA_1", "PIG_1", "PIN_1"), maintenance := "MDNR-Bay City"]
+foo[site %in% c("TAW_1", "AUG_1", "RIF_1", "SGN_1", "PNC_1", "KAW_1", "QUA_1", "PIG_1", "PIN_1", "SEB_1"), maintenance := "MDNR-Bay City"]
 foo[maintenance == "MDNR-Bay City", desc := "Saginaw Bay tributaries- walleye"]
 
 # USGS-HBBS/MDNR-Alpena

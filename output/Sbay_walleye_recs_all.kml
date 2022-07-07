@@ -215,6 +215,10 @@
       <Point><coordinates>-83.275839,43.94318</coordinates></Point>
   </Placemark>
   <Placemark>
+	<name>SEB_1</name>
+      <Point><coordinates>-83.452899,43.734255</coordinates></Point>
+  </Placemark>
+  <Placemark>
 	<name>TRA_1</name>
       <Point><coordinates>-84.246681,43.61075</coordinates></Point>
   </Placemark>
