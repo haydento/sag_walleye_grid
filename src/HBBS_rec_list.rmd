@@ -25,6 +25,7 @@ h4.date {
 tar_load(leaflet_pts)
 
 foo <- extract_coordinates(leaflet_pts, latlon = TRUE, offshore = TRUE)
+
 foo[deployment == "tube", rec_type := "VR2W or VR2Tx"]
 foo[deployment == "1ft lower bridle, 3ft upper bridle", rec_type := "VR2AR"]
 foo[deployment == "8ft lower bridle, 5ft upper bridle", rec_type := "VR2AR"]

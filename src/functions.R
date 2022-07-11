@@ -1474,6 +1474,12 @@ clean_leaflet <- function(reefs = reefs, LH_grid = grid, dirty_lines = dirty_lin
   # add column of deployment type
   pts$dep_type <- ifelse(pts$chart_depth_ft <= 15, "tube", ifelse(pts$chart_depth_ft > 15 & pts$chart_depth_ft <= 30, "1ft lower bridle, 3ft upper bridle", "8ft lower bridle, 5ft upper bridle"))
 
+  # fix deployment types for receivers that will be mounted on existing buoys
+  pts$dep_type <- ifelse(pts$site %in% c("SBG_1", "SBG_12", "SBG_14", "SBG_11"), "mount on existing structure", pts$dep_type)
+
+  # knock out SBG_2 and SBG_3
+  pts <- pts[!(pts$site %in% c("SBG_2", "SBG_3")),]
+                                                           
   return(pts)
 }
 
@@ -1489,7 +1495,7 @@ extract_coordinates <- function(x, latlon = TRUE, offshore = TRUE){
   out <- data.table(site = x$site, glatos_array = x$glatos_array, station_no = x$station_no, depth_ft = round(x$chart_depth_ft, 1), lon = coords$X, lat = coords$Y, deployment = x$dep_type)
 
   if(offshore == TRUE) {
-    out <- out[!glatos_array %in% c("YTZ", "KAW", "RIF", "AUG", "TAW", "PIN", "SGN", "PNC", "QUA", "PIG"), on = "glatos_array"]
+    out <- out[!glatos_array %in% c("YTZ", "KAW", "RIF", "AUG", "TAW", "PIN", "SGN", "PNC", "QUA", "PIG", "SEB"), on = "glatos_array"]
     out <- out[!is.na(glatos_array),]
     
     }

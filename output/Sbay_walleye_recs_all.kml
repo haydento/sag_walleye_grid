@@ -64,15 +64,7 @@
   </Placemark>
   <Placemark>
 	<name>SBG_1</name>
-      <Point><coordinates>-83.84483,43.694</coordinates></Point>
-  </Placemark>
-  <Placemark>
-	<name>SBG_2</name>
-      <Point><coordinates>-83.7185,43.67768</coordinates></Point>
-  </Placemark>
-  <Placemark>
-	<name>SBG_3</name>
-      <Point><coordinates>-83.6336017263764,43.6819881469489</coordinates></Point>
+      <Point><coordinates>-83.8733,43.673</coordinates></Point>
   </Placemark>
   <Placemark>
 	<name>SBG_4</name>
@@ -104,11 +96,11 @@
   </Placemark>
   <Placemark>
 	<name>SBG_11</name>
-      <Point><coordinates>-83.47172,43.8729</coordinates></Point>
+      <Point><coordinates>-83.46103,43.89947</coordinates></Point>
   </Placemark>
   <Placemark>
 	<name>SBG_12</name>
-      <Point><coordinates>-83.813,43.9285</coordinates></Point>
+      <Point><coordinates>-83.8337,43.90068</coordinates></Point>
   </Placemark>
   <Placemark>
 	<name>SBG_13</name>
@@ -116,7 +108,7 @@
   </Placemark>
   <Placemark>
 	<name>SBG_14</name>
-      <Point><coordinates>-83.62099,43.93746</coordinates></Point>
+      <Point><coordinates>-83.6457,43.93162</coordinates></Point>
   </Placemark>
   <Placemark>
 	<name>SBG_15</name>

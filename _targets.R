@@ -326,7 +326,7 @@ tar_target(
   format = "rds"
 ),
 
-# 10 km base grid(includes both recevier and grid points, some overlap)
+# 10 km base grid(includes both recevier and grid points, some overlap, 2022-07-11)
 tar_target(
   grid_10km_dup_reefs,
   .inner_bay_rec_grid(bbox = c(xmin = -83.948193, xmax = -82.946270, ymin = 43.595602, ymax = 44.277664),
